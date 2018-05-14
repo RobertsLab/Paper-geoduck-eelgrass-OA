@@ -1,0 +1,7 @@
+data/DIA/DIA-Report-long.csv
+results/DIA/DIA-annotated-UniprotID.csv
+results/DIA/DIA-detected-peptides-annotated.csv
+*.mzML
+*.raw 
+.RData
+.Rproj.user
