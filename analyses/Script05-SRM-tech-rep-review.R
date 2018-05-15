@@ -121,9 +121,9 @@ api_create(p.NMDS.techrep, filename = "Geoduck-SRM-tech-rep-NMDS") #Pushes plot 
 SRM.temp1 <- t(SRM.data.screened.noPRTC[,-1:-4]) #transform and remove extraneous protein info
 SRM.temp2 <- as.data.frame(melt(SRM.temp1, id=rownames(SRM.temp1))) #melt data into long-format
 colnames(SRM.temp2)[2] <- "Transition"
-SRM.temp2$Var1 <- gsub('-remake-', '-', SRM.temp2$Var1)
-SRM.temp2$Var1 <- as.character(SRM.temp2$Var1) #convert sample ID to character strings
-SRM.temp3 <- separate(data=SRM.temp2, col=Var1, into = c('Sample', 'Replicate'), sep = -3, convert = TRUE) #split sample ID into number, replicate 
+SRM.temp2$X1 <- gsub('-remake-', '-', SRM.temp2$X1)
+SRM.temp2$X1 <- as.character(SRM.temp2$X1) #convert sample ID to character strings
+SRM.temp3 <- separate(data=SRM.temp2, col=X1, into = c('Sample', 'Replicate'), sep = -3, convert = TRUE) #split sample ID into number, replicate 
 
 # Calculate mean, sd, variance for transition abundances between tech. reps
 SRM.reps4stats <- dcast(SRM.temp3, Sample + Transition ~ Replicate) #widen data to create a column for each replicate with area data
@@ -136,8 +136,27 @@ SRM.reps4stats.plots <- merge(x=SRM.reps4stats, y=SRM.data.screened.noPRTC[,1:3]
 names(SRM.reps4stats.plots) <- c("Transition","Sample","-A","-B","-C","-D","sd","mean","variance","Protein", "Fragment","Peptide") #simplify column names
 write.csv(SRM.reps4stats.plots, file="analyses/SRM/SRM-techrep-stats.csv") #Save tech rep stats data as .csv 
 
+## Remove poor quality reps and re-do plot 
+
+# Tech reps removed: 42C, 53B, 53D, 70C, 73B, 104B, 104D, 127B, 128A, 55A, 114A, 114D
+# Entire sample removed: 3, 53, 57
+
+SRM.temp2.screened <- SRM.temp2[!grepl("G003|G042-C|G053-B|G053-D|G070-C|G073-B|G104-B|G104-D|G127-B|G128-A|G055-A|G114-A|G114-D|G057|G053", SRM.temp2$X1),]
+SRM.temp3.s <- separate(data=SRM.temp2.screened, col=X1, into = c('Sample', 'Replicate'), sep = -3, convert = TRUE) #split sample ID into number, replicate 
+
+# Calculate stats after removal 
+SRM.reps4stats.s <- dcast(SRM.temp3.s, Sample + Transition ~ Replicate) #widen data to create a column for each replicate with area data
+SRM.reps4stats.s$sd <- apply(SRM.reps4stats.s[,3:6], 1, sd, na.rm=TRUE) #calculate standard deviation across all replicates for each sample
+SRM.reps4stats.s$mean <- apply(SRM.reps4stats.s[,3:6], 1, mean, na.rm=TRUE) #calculate mean across all replicates for each sample
+SRM.reps4stats.s$cv <- (SRM.reps4stats.s$sd/SRM.reps4stats.s$mean)*100 #calculate coefficient of variation across all replicates for each sample
+
+# Merge protein info back # save data set
+SRM.reps4stats.s.plots <- merge(x=SRM.reps4stats.s, y=SRM.data.screened.noPRTC[,1:3], by.x=2, by.y=0, all.x=TRUE, all.y=FALSE)
+names(SRM.reps4stats.s.plots) <- c("Transition","Sample","-A","-B","-C","-D","sd","mean","cv","Protein", "Fragment","Peptide") #simplify column names
+write.csv(SRM.reps4stats.s.plots, file="analyses/SRM/SRM-techrep-stats.csv") #Save tech rep stats data as .csv 
+
 # Plot coefficients of variation via Plotly, push online and save as static .png
-p.techrep <-  plot_ly(data = SRM.reps4stats.plots, x = ~Sample, y = ~variance, type="scatter", mode="markers", color=~Protein, hovertext=~paste(Protein, Transition)) %>%  #generate plotly plot
+p.techrep <-  plot_ly(data = SRM.reps4stats.s.plots, x = ~Sample, y = ~cv, type="scatter", mode="markers", color=~Protein, hovertext=~paste(Protein, Transition)) %>%  #generate plotly plot
   layout(title="Coefficient of Variance among technical reps, by sample",
          yaxis = list(title = 'Coefficient of Variance'),
          legend = list(x=.75, y=.95))
@@ -145,25 +164,22 @@ api_create(p.techrep, filename = "Geoduck-SRM-tech-rep-CV") #Pushes plot to Plot
 plotly_IMAGE(p.techrep, width = 1200, height = 500, format = "png", scale = 2,
              out_file = "results/SRM/Geoduck-SRM-tech-rep-CV.png")
 
-## Remove poor quality reps and re-do plot 
-
-# Tech reps removed: 3C, 42C, 53B, 53D, 70C, 73B, 104B, 104D, 127B, 128A, 55A, 114A, 114D
-# Entire sample removed: 57
-
-SRM.temp2.screened <- SRM.temp2[!grepl("3-C|42-C|53-B|53-D|70-C|73-B|104-B|104-D|127-B|128-A|55-A|114-A|114-D|57", SRM.temp2$Var1),]
-SRM.temp3.s <- separate(data=SRM.temp2.screened, col=Var1, into = c('Sample', 'Replicate'), sep = -3, convert = TRUE) #split sample ID into number, replicate 
-
-# Calculate stats after removal 
-SRM.reps4stats.s <- dcast(SRM.temp3.s, Sample + Transition ~ Replicate) #widen data to create a column for each replicate with area data
-SRM.reps4stats.s$sd <- apply(SRM.reps4stats.s[,3:6], 1, sd, na.rm=TRUE) #calculate standard deviation across all replicates for each sample
-SRM.reps4stats.s$mean <- apply(SRM.reps4stats.s[,3:6], 1, mean, na.rm=TRUE) #calculate mean across all replicates for each sample
-SRM.reps4stats.s$variance <- (SRM.reps4stats.s$sd/SRM.reps4stats.s$mean)*100 #calculate coefficient of variace across all replicates for each sample
-
-# Merge protein info back # save data set
-SRM.reps4stats.s.plots <- merge(x=SRM.reps4stats.s, y=SRM.data.screened.noPRTC[,1:3], by.x=2, by.y=0, all.x=TRUE, all.y=FALSE)
-names(SRM.reps4stats.s.plots) <- c("Transition","Sample","-A","-B","-C","-D","sd","mean","variance","Protein", "Fragment","Peptide") #simplify column names
-write.csv(SRM.reps4stats.s.plots, file="analyses/SRM/SRM-techrep-stats.csv") #Save tech rep stats data as .csv 
-
-## Filter dataset to removes any remaining transitions within samples with cv >20 
-SRM.final <- SRM.reps4stats.s.plots[which(SRM.reps4stats.s.plots$variance <= 20),] #final dataset to be used in SRM analysis ("mean" column)
+## Filter dataset to removes any remaining transitions within samples with cv >40 
+SRM.final <- SRM.reps4stats.s.plots[which(SRM.reps4stats.s.plots$cv <= 40),] #final dataset to be used in SRM analysis ("mean" column)
 write.csv(SRM.final, file="analyses/SRM/SRM-data-screened-final.csv")
+
+# Number transitions maintained in final SRM dataset (out of 113 targets)
+length(unique(SRM.final$Transition))
+86/113
+       
+# Number technical reps maintained in final SRM dataset 
+length(unique(SRM.temp2.screened$X1)) #96 maintained
+length(unique(SRM.temp2$X1)) #116 original
+(length(unique(SRM.temp2.screened$X1)) / length(unique(SRM.temp2$X1)))*100 #83% success rate  
+(45/48)*100 # 94% sample success rate 
+
+# Number of transitions removed from individual samples 
+nrow(SRM.reps4stats.s.plots[which(SRM.reps4stats.s.plots$cv >= 40),]) #74 transition entries
+nrow(SRM.reps4stats.s.plots[which(SRM.reps4stats.s.plots$cv >= 40),])/nrow(SRM.reps4stats.s.plots) #percent of transition entries removed due to high CV (>40)
+length(unique(SRM.reps4stats.s.plots[which(SRM.reps4stats.s.plots$cv >= 40),"Sample"])) #21 samples 
+length(unique(SRM.reps4stats.s.plots[which(SRM.reps4stats.s.plots$cv >= 40),"Protein"])) #11 proteins 

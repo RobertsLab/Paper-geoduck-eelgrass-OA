@@ -297,17 +297,17 @@ for (i in 1:length(Env.parameters)) {
 # Test differences on daily mean dataframe
 
 # Are daily means different between Bay, Habitats within Bay? 
-anova(lm(daily.mean ~ Bay*Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "pH"),])) #yes
-summary(lm(daily.mean ~ Bay*Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "pH"),])) #yes
+summary(pH.mean.lm <- lm(daily.mean ~ Bay*Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "pH"),]))
+anova(pH.mean.lm)
 
-anova(lm(daily.mean ~ Bay*Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "DO"),]))  #yes
-summary(lm(daily.mean ~ Bay*Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "DO"),]))  #yes
+summary(DO.mean.lm <- lm(daily.mean ~ Bay*Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "DO"),]))  #yes
+anova(DO.mean.lm)
 
-anova(lm(daily.mean ~ Bay* Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "Temperature"),])) #not between habitats
-summary(lm(daily.mean ~ Bay* Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "Temperature"),])) #not between habitats
+summary(Temp.mean.lm <- lm(daily.mean ~ Bay* Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "Temperature"),])) #not between habitats
+anova(Temp.mean.lm)
 
-anova(lm(daily.mean ~ Bay* Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "Salinity"),]))  #yes 
-summary(lm(daily.mean ~ Bay* Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "Salinity"),]))  #yes
+summary(Salin.mean.lm <- lm(daily.mean ~ Bay* Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "Salinity"),]))  #yes
+anova(Salin.mean.lm)
 
 
 # Assess normality of daily variance - not normal. 

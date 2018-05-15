@@ -2,20 +2,19 @@
 
 #reformat data: 
 SRM.matrix <- dcast(SRM.final, Transition ~ Sample, value.var="mean")
-View(SRM.matrix)
+
 #Replace NA cells with 0; metaMDS() does not handle NA's
 rownames(SRM.matrix) <- as.character(SRM.matrix[,1])
 SRM.matrix[is.na(SRM.matrix)] <- 0
 
 #Make MDS dissimilarity matrix
-SRM.mean.nmds <- metaMDS(log(SRM.matrix[-1]+1), distance = 'bray', k = 2, trymax = 10000, autotransform = FALSE)
+SRM.mean.nmds <- metaMDS(SRM.matrix[-1], distance = 'bray', k = 2, trymax = 10000, autotransform = FALSE)
 
 #Make NMDS stressplot
 png("analyses/SRM/SRM-NMDS-stressplot.png")
 stressplot(SRM.mean.nmds) 
 dev.off()
 
-ordiplot(SRM.mean.nmds)
 #Create plots 
 SRM.nmds.mean.samples <- scores(SRM.mean.nmds, display = "species")
 SRM.nmds4plotly <- as.data.frame(SRM.nmds.mean.samples)
@@ -35,17 +34,17 @@ plotly_IMAGE(p.SRM.NMDS, width = 1000, height = 1000, format = "png", scale = 2,
 # Plot for paper 
 marker1 = c("sienna1", "goldenrod1", "steelblue2", "royalblue3")
 
-png("results/SRM/SRM-NMDS-for-paper.png", width = 700, height = 700) 
+png("results/SRM/SRM-NMDS-for-paper.png", width = 800, height = 600) 
 par(mar=c(5,5,4,1)+.1)
-plot.default(x=NULL, y=NULL, type="n", xlab="Axis 1", ylab="Axis 2", xlim=c(-3,1.1), ylim=c(-0.4,0.25), asp=NA, main="Geoduck SRM Protein Abundance\nNMDS Similarity Plot", width=600,height=600, cex.axis=1.4, cex.lab=1.6, cex.main=1.4)
-points(SRM.nmds4plotly[c(CI.B.samples),], col=marker1[2], pch=15, cex=2.5, lwd=2)
-points(SRM.nmds4plotly[c(CI.E.samples),], col=marker1[2], pch=8, cex=2.5, lwd=2)
-points(SRM.nmds4plotly[c(PG.B.samples),], col=marker1[3], pch=15, cex=2.5, lwd=2)
-points(SRM.nmds4plotly[c(PG.E.samples),], col=marker1[3], pch=8, cex=2.5, lwd=2)
-points(SRM.nmds4plotly[c(WB.B.samples),], col=marker1[1], pch=15, cex=2.5, lwd=2)
-points(SRM.nmds4plotly[c(WB.E.samples),], col=marker1[1], pch=8, cex=2.5, lwd=2)
-points(SRM.nmds4plotly[c(FB.B.samples),], col=marker1[4], pch=15, cex=2.5, lwd=2)
-points(SRM.nmds4plotly[c(FB.E.samples),], col=marker1[4], pch=8, cex=2.5, lwd=2)
-legend(0.2,0.26, pch=c(rep(16,4), 8, 15), cex=1.4, legend=c("Fidalgo Bay", "Port Gamble", 'Case Inlet', "Willapa Bay", "Eelgrass", "Unvegetated"), col=c(marker1[4], marker1[3], marker1[2], marker1[1], "black", "black"))
+plot.default(x=NULL, y=NULL, type="n", xlab="Axis 1", ylab="Axis 2", xlim=c(-3.6,3), ylim=c(-0.28,0.22), asp=NA, main="Geoduck SRM Protein Abundance\nNMDS Similarity Plot", width=600,height=600, cex.axis=1.8, cex.lab=1.8, cex.main=1.8)
+points(SRM.nmds4plotly[c(CI.B.samples),], col=marker1[2], pch=15, cex=2.7, lwd=2)
+points(SRM.nmds4plotly[c(CI.E.samples),], col=marker1[2], pch=8, cex=2.7, lwd=2)
+points(SRM.nmds4plotly[c(PG.B.samples),], col=marker1[3], pch=15, cex=2.7, lwd=2)
+points(SRM.nmds4plotly[c(PG.E.samples),], col=marker1[3], pch=8, cex=2.7, lwd=2)
+points(SRM.nmds4plotly[c(WB.B.samples),], col=marker1[1], pch=15, cex=2.7, lwd=2)
+points(SRM.nmds4plotly[c(WB.E.samples),], col=marker1[1], pch=8, cex=2.7, lwd=2)
+points(SRM.nmds4plotly[c(FB.B.samples),], col=marker1[4], pch=15, cex=2.7, lwd=2)
+points(SRM.nmds4plotly[c(FB.E.samples),], col=marker1[4], pch=8, cex=2.7, lwd=2)
+legend(-3.6,0.22, pch=c(rep(16,4), 8, 15), cex=1.4, legend=c("Fidalgo Bay", "Port Gamble", 'Case Inlet', "Willapa Bay", "Eelgrass", "Unvegetated"), col=c(marker1[4], marker1[3], marker1[2], marker1[1], "black", "black"))
 dev.off()
 
