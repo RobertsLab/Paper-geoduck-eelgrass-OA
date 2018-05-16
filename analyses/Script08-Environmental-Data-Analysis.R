@@ -193,77 +193,12 @@ aggregate(value ~ metric, Env.Data.Master.noOuts, max)
 aggregate(value ~ metric + Habitat , Env.Data.Master.noOuts, mean)
 aggregate(value ~ metric + Habitat , Env.Data.Master.noOuts, var)
 aggregate(value ~ metric, Env.Data.Master.noOuts, var)
-aggregate(value ~ metric + Bay , Env.Data.Master.noOuts, mean)
+View(aggregate(value ~ metric + variable , Env.Data.Master.noOuts, mean))
+View(aggregate(value ~ metric + variable , Env.Data.Master.noOuts, sd))
+
 
 # Correlation plots between summary stats within enviromental parameters 
 pairs(EnvSum[6:11]) # Independent parameters to use: Mean, Var
-
-# ANOVA testing on mean & variance 
-
-# compare means 
-e.ANOVA.mean.habitat <- vector("list", length(Env.parameters))
-for (i in 1:length(Env.parameters)) {
-  temp1 <- anova(lm(Mean ~ Habitat, EnvSum[which(EnvSum$metric %in% Env.parameters[[i]]),]))
-  e.ANOVA.mean.habitat[[i]] <- as.data.frame(temp1[,c(1:5)])
-  e.ANOVA.mean.habitat[[i]]$metric <- c((Env.parameters[i]))
-  e.ANOVA.mean.habitat[[i]]$Response <-  rownames(e.ANOVA.mean.habitat[[i]])
-  e.ANOVA.mean.habitat[[i]]$Comparison <-  c("Habitat")
-  e.ANOVA.mean.habitat[[i]]$Stat <-  c("Mean")
-}
-e.ANOVA.mean.bay <- vector("list", length(Env.parameters))
-for (i in 1:length(Env.parameters)) {
-  temp1 <- anova(lm(Mean ~ Bay, EnvSum[which(EnvSum$metric %in% Env.parameters[[i]]),]))
-  e.ANOVA.mean.bay[[i]] <- as.data.frame(temp1[,c(1:5)])
-  e.ANOVA.mean.bay[[i]]$metric <- c((Env.parameters[i]))
-  e.ANOVA.mean.bay[[i]]$Response <-  rownames(e.ANOVA.mean.bay[[i]])
-  e.ANOVA.mean.bay[[i]]$Comparison <-  c("Bay")
-  e.ANOVA.mean.bay[[i]]$Stat <-  c("Mean")
-}
-e.ANOVA.mean.region <- vector("list", length(Env.parameters))
-for (i in 1:length(Env.parameters)) {
-  temp1 <- anova(lm(Mean ~ Region, EnvSum[which(EnvSum$metric %in% Env.parameters[[i]]),]))
-  e.ANOVA.mean.region[[i]] <- as.data.frame(temp1[,c(1:5)])
-  e.ANOVA.mean.region[[i]]$metric <- c((Env.parameters[i]))
-  e.ANOVA.mean.region[[i]]$Response <-  rownames(e.ANOVA.mean.region[[i]])
-  e.ANOVA.mean.region[[i]]$Comparison <-  c("Region")
-  e.ANOVA.mean.region[[i]]$Stat <-  c("Mean")
-}
-
-# Compare variances 
-e.ANOVA.var.habitat <- vector("list", length(Env.parameters))
-for (i in 1:length(Env.parameters)) {
-  temp1 <- anova(lm(Var ~ Habitat, EnvSum[which(EnvSum$metric %in% Env.parameters[[i]]),]))
-  e.ANOVA.var.habitat[[i]] <- as.data.frame(temp1[,c(1:5)])
-  e.ANOVA.var.habitat[[i]]$metric <- c((Env.parameters[i]))
-  e.ANOVA.var.habitat[[i]]$Response <-  rownames(e.ANOVA.var.habitat[[i]])
-  e.ANOVA.var.habitat[[i]]$Comparison <-  c("Habitat")
-  e.ANOVA.var.habitat[[i]]$Stat <-  c("Var")
-}
-e.ANOVA.var.bay <- vector("list", length(Env.parameters))
-for (i in 1:length(Env.parameters)) {
-  temp1 <- anova(lm(Var ~ Bay, EnvSum[which(EnvSum$metric %in% Env.parameters[[i]]),]))
-  e.ANOVA.var.bay[[i]] <- as.data.frame(temp1[,c(1:5)])
-  e.ANOVA.var.bay[[i]]$metric <- c((Env.parameters[i]))
-  e.ANOVA.var.bay[[i]]$Response <-  rownames(e.ANOVA.var.bay[[i]])
-  e.ANOVA.var.bay[[i]]$Comparison <-  c("Bay")
-  e.ANOVA.var.bay[[i]]$Stat <-  c("Var")
-}
-e.ANOVA.var.region <- vector("list", length(Env.parameters))
-for (i in 1:length(Env.parameters)) {
-  temp1 <- anova(lm(Var ~ Region, EnvSum[which(EnvSum$metric %in% Env.parameters[[i]]),]))
-  e.ANOVA.var.region[[i]] <- as.data.frame(temp1[,c(1:5)])
-  e.ANOVA.var.region[[i]]$metric <- c((Env.parameters[i]))
-  e.ANOVA.var.region[[i]]$Response <-  rownames(e.ANOVA.var.region[[i]])
-  e.ANOVA.var.region[[i]]$Comparison <-  c("Region")
-  e.ANOVA.var.region[[i]]$Stat <-  c("Var")
-}
-
-Env.ANOVA <- do.call("rbind", list(e.ANOVA.mean.habitat, e.ANOVA.mean.bay, e.ANOVA.mean.region, e.ANOVA.var.habitat, e.ANOVA.var.bay, e.ANOVA.var.region))
-Env.ANOVA <- do.call(rbind, Env.ANOVA)
-Env.ANOVA$P.adj <- (Env.ANOVA$`Pr(>F)`*4)
-View(Env.ANOVA)
-
-write.csv(file="results/Environmental/Environmental-ANOVA-Results.csv", Env.ANOVA)
 
 # Generate time-series of daily means, daily variance pH
 
@@ -282,8 +217,10 @@ Env.Data.Master.noOuts_daily <- Env.Data.Master.noOuts %>%
 Env.Data.Master.noOuts_daily <- as.data.frame(subset(Env.Data.Master.noOuts, !((metric=="Tide")))  %>%
                                                 mutate(Day = as.Date(DateTime, format = "%Y-%m-%d")) %>%
                                                 group_by(Day, variable, metric, Bay, Habitat, Region) %>% # group by the day column
-                                                summarise(daily.mean=mean(value), daily.sd=sd(value), daily.var=var(value)) %>%  
+                                                summarise(daily.mean=mean(value), daily.sd=sd(value), daily.var=var(value), daily.min=min(value), daily.max=max(value)) %>%  
                                                 na.omit())
+
+# statistics on daily mean and daily standard deviation data sets 
 
 # Assess normality of daily means - pretty good 
 par(mfrow = c(2, 2))
@@ -294,9 +231,11 @@ for (i in 1:length(Env.parameters)) {
 for (i in 1:length(Env.parameters)) {
   hist(Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% Env.parameters[i]),"daily.mean"], main = Env.parameters[[i]], xlab = "Frequency")}
 
-# Test differences on daily mean dataframe
+# Test differences in daily mean for each parameter 
 
 # Are daily means different between Bay, Habitats within Bay? 
+.05/16 # P-value needs to be below 0.003125
+
 summary(pH.mean.lm <- lm(daily.mean ~ Bay*Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "pH"),]))
 anova(pH.mean.lm)
 
@@ -309,58 +248,63 @@ anova(Temp.mean.lm)
 summary(Salin.mean.lm <- lm(daily.mean ~ Bay* Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "Salinity"),]))  #yes
 anova(Salin.mean.lm)
 
-
-# Assess normality of daily variance - not normal. 
+# Assess normality of daily standard deviation - not normal. 
 par(mfrow = c(2, 2))
 for (i in 1:length(Env.parameters)) {
-  qqnorm(Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% Env.parameters[i]),"daily.var"], main = Env.parameters[[i]],
+  qqnorm(Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% Env.parameters[i]),"daily.sd"], main = Env.parameters[[i]],
          xlab = "Theoretical Quantiles", ylab = "Daily Mean Parameter Value", plot.it = TRUE)
-  qqline(Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% Env.parameters[i]),"daily.var"])}
+  qqline(Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% Env.parameters[i]),"daily.sd"])}
 for (i in 1:length(Env.parameters)) {
-  hist(Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% Env.parameters[i]),"daily.var"], main = Env.parameters[[i]], xlab = "Frequency")}
+  hist(Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% Env.parameters[i]),"daily.sd"], main = Env.parameters[[i]], xlab = "Frequency")}
 
 #calculate lambda value to use to transform daily variances  
 par(mfrow = c(4, 3))
 for (i in 1:length(Env.parameters)) {
   print(Env.parameters[[i]])
-  transformTukey(Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% Env.parameters[i]),"daily.var"], plotit=TRUE, statistic = 1) 
+  transformTukey(Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% Env.parameters[i]),"daily.sd"], plotit=TRUE, statistic = 1) 
 }
 
 #Create new column in dataframe with lambda-transformed area data
-Env.Data.Master.noOuts_daily$var.lambda <- c(rep("x", times=nrow(Env.Data.Master.noOuts_daily)))
+Env.Data.Master.noOuts_daily$sd.lambda <- c(rep("x", times=nrow(Env.Data.Master.noOuts_daily)))
 
 # Transform abundance data via its designated lambda value 
-var.lambda <- c(0.05, 0.1, 0.375, -0.15) #pulled from console print-out 
+sd.lambda <- c(0.1, 0.2, 0.725, -0.275) #pulled from console print-out 
 for (i in 1:length(Env.parameters)) {
-  Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% Env.parameters[i]),"var.lambda"] <-Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% Env.parameters[i]),"daily.var"]^var.lambda[i]
+  Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% Env.parameters[i]),"sd.lambda"] <-Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% Env.parameters[i]),"daily.var"]^sd.lambda[i]
 }
 
 #convert lambda.t values to numeric
-Env.Data.Master.noOuts_daily$var.lambda <- as.numeric(Env.Data.Master.noOuts_daily$var.lambda) 
+Env.Data.Master.noOuts_daily$sd.lambda <- as.numeric(Env.Data.Master.noOuts_daily$sd.lambda) 
 
-# Confirm normality of transformed daily variance 
+# Confirm normality of transformed daily std. dev 
 par(mfrow = c(2, 2))
 for (i in 1:length(Env.parameters)) {
-  qqnorm(Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% Env.parameters[i]),"var.lambda"], main = Env.parameters[[i]],
+  qqnorm(Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% Env.parameters[i]),"sd.lambda"], main = Env.parameters[[i]],
          xlab = "Theoretical Quantiles", ylab = "Daily Mean Parameter Value", plot.it = TRUE)
-  qqline(Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% Env.parameters[i]),"var.lambda"])}
+  qqline(Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% Env.parameters[i]),"sd.lambda"])}
 for (i in 1:length(Env.parameters)) {
-  hist(Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% Env.parameters[i]),"var.lambda"], main = Env.parameters[[i]], xlab = "Frequency")}
+  hist(Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% Env.parameters[i]),"sd.lambda"], main = Env.parameters[[i]], xlab = "Frequency")}
 
-# Test differences on daily var (transformed) dataframe
+# Test differences on daily std.dev (transformed) dataframe
 
-# Are daily means different between Bay, Habitats within Bay? 
-anova(lm(var.lambda ~ Bay*Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "pH"),]))
-summary(lm(var.lambda ~ Bay*Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "pH"),])) #yes
+# Are daily sd different between Bay, Habitats within Bay? 
+summary(pH.sd.lm <- lm(sd.lambda ~ Bay*Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "pH"),])) #yes
+anova(pH.sd.lm)
 
-anova(lm(var.lambda ~ Bay*Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "DO"),]))  #yes
-summary(lm(var.lambda ~ Bay*Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "DO"),]))  #yes
+min(Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "pH"),"daily.sd"])
+max(Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "pH"),"daily.sd"])
+mean(Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "pH"),"daily.sd"])
 
-anova(lm(var.lambda ~ Bay* Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "Temperature"),])) #not between habitats
-summary(lm(var.lambda ~ Bay* Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "Temperature"),])) #not between habitats
+mean(Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "pH"),c("daily.max", "variable")]) - mean(Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "pH"),"daily.min"])
 
-anova(lm(var.lambda ~ Bay* Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "Salinity"),]))  #yes 
-summary(lm(var.lambda ~ Bay* Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "Salinity"),]))  #yes
+summary(DO.sd.lm <- lm(sd.lambda ~ Bay*Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "DO"),]))  #yes
+anova(DO.sd.lm)
+
+summary(T.sd.lm <- lm(sd.lambda ~ Bay*Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "Temperature"),])) #not between habitats
+anova(T.sd.lm)
+
+summary(S.sd.lm <- lm(sd.lambda ~ Bay* Habitat, data=Env.Data.Master.noOuts_daily[which(Env.Data.Master.noOuts_daily$metric %in% "Salinity"),]))  #yes
+anova(S.sd.lm)
 
 # Plot daily environmental parameters 
 group.colors <- c(WB = "sienna1", CI = "goldenrod1", PG ="steelblue2",  FB = "royalblue3")
@@ -433,3 +377,5 @@ dev.off()
 png("results/Environmental/Salinity-WB-daily-mean.png", width=700, height=700)
 ggplot(data=subset(Env.Data.Master.noOuts_daily, (metric=="Salinity" & (variable=="WB-E" | variable=="WB-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="sienna1")  + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=24, face="bold"), axis.text.y=element_text(size=18, angle=45, face="bold"), axis.text.x=element_text(size=18, face="bold"), axis.title=element_blank(), legend.position = "none", panel.background = element_blank()) + ggtitle("Willapa Bay Salinity") + ylim(25, 45) + xlim("0016-06-01"," 0016-07-19")
 dev.off()
+
+

@@ -15,8 +15,7 @@ par(mfrow=c(1,1))
 hist(Growth$AvgIShell) #normal dist? 
 hist(Growth$FShell) #normal dist? 
 
-summary(lm(Growth ~ Both-1, data=Growth)) #mean growth for each location 
-anova(lm(Growth ~ Bay/Habitat, data=Growth)) #no growth differences between habitats within bays, so now look at all combination of bays 
+anova(lm(Growth ~ Bay*Habitat, data=Growth)) #no growth differences between habitats within bays, so now look at all combination of bays 
 anova(lm(Growth ~ Bay, data=Growth)) # yes, growth differences between bays. 
 
 # See which bays had diff. growth. Pull t-value and p-values from summary() with various Bay as the reference factors 
@@ -41,10 +40,14 @@ summary(lm(Growth ~ Bay, data=Growth))
 # How significant was the growth by region? 
 anova(lm(Growth ~ Region, data=Growth)) 
 
+Growth$Percent <- (((Growth$Growth+Growth$AvgIShell)/Growth$AvgIShell)-1)*100
+aggregate(Percent ~ Both, Growth, mean)
+aggregate(Percent ~ Both, Growth, sd)
+
+
 # Survival statistics
 Survival <- read.csv("data/Geoduck-Survival.csv", header=TRUE, stringsAsFactors = TRUE)
 chisq.test(table(Survival$Survival, Survival$Both)) #not significant  
 chisq.test(table(Survival$Survival, Survival$Bay)) #not significant  
 chisq.test(table(Survival$Survival, Survival$Region)) #not significant  
-anova(lm(Survival ~ Region/Bay/Both, data=Survival)) #No difference in survival between site or habitat
-
+anova(lm(Survival ~ Region*Bay*Exclosure, data=Survival)) #No difference in survival between site or habitat

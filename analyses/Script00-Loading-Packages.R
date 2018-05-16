@@ -13,6 +13,7 @@ library(rcompanion)
 library(reshape)
 library(reshape2)
 library(pryr)
+library(HH)
 
 Sys.setenv("plotly_username"="lhs3") #Insert Plotly username 
 Sys.setenv("plotly_api_key"="hIUVsdBYDizTQLhMUwLC") #Insert Plotly API key

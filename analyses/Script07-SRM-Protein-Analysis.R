@@ -2,6 +2,9 @@
 # In this analysis, I will assume protein abundances are independent of each other, aka the abundance of one does not directly influence another 
 # Use "SRM.final" dataset
 
+# Mean CV from remaining technical rep transitions 
+mean(SRM.final$cv)
+
 #melt SRM data to prepare for analysis & merge back with metadata 
 data.melted <- melt(SRM.final[c("Transition", "Sample", "mean", "Protein", "Peptide")], id=c("Transition", "Sample", "Protein", "Peptide"), variable.name = "mean.abund", value.name = "mean")
 data.melted.plus <- merge(x=data.melted, y=repsTOsamples.filtered.annotated[,c("Comment", "Bay", "Habitat", "Exclosure", "Sample.Shorthand")], by.x="Sample", by.y="Comment", all.x=T, all.y=F)
@@ -17,6 +20,7 @@ write.csv(data.melted.plus, "results/SRM/SRM-data-meaned-melted.csv")
 # Sum transitions within each peptide 
 data.melted.plus.pepsum <- aggregate(value ~ Peptide + Sample + Protein + Region + Bay + Habitat + Exclosure + Sample.Shorthand, data.melted.plus, sum)
 write.csv(data.melted.plus.pepsum, "results/SRM/SRM-data-peptide-summed.csv")
+
 
 # pull out protein names 
 Protein.names <- levels(data.melted.plus.pepsum$Protein)
