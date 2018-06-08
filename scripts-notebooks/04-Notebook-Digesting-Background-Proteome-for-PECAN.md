@@ -8,12 +8,12 @@
    * [Protein Digestion Simulator](https://omics.pnl.gov/software/protein-digestion-simulator); verison used: 2.2.6138.19320
 
 ### Files Needed:
-  * Peptide Retention Time Calibration mixture fasta from Emma, saved in this repo [here](../../data/DIA/P00000_Pierce_prtc.fasta)
-  * Geoduck Gonad Transcriptome, which you downloaded along with the .raw files in Notebook 00 and saved alongside raw data [here](../..data/DIA/2017-Geoduck-DIA-raw/)
+  * Peptide Retention Time Calibration mixture fasta from Emma, saved in this repo [here](../data/DIA/P00000_Pierce_prtc.fasta)
+  * Geoduck Gonad Transcriptome, which you downloaded along with the .raw files in Notebook 00 and saved alongside raw data [here](../data/DIA/2017-Geoduck-DIA-raw/)
 
 ### First add the PRTC protein sequences to my background proteome fasta file
 
-Let's take a look at it the [PRTC fasta](../../data/DIA/P00000_Pierce_prtc.fasta). 
+Let's take a look at it the [PRTC fasta](../data/DIA/P00000_Pierce_prtc.fasta). 
 
 
 ```python
@@ -65,7 +65,7 @@ cat ../../data/DIA/P00000_Pierce_prtc.fasta
 ### Open Protein Digestion Simulator
 
 Here is the version I installed & used on Emu
-![PDS about](../../images/UsingPDS01.png)
+![PDS about](../images/UsingPDS01.png)
 
 The program is a gui, but requires the use of WINE in Emu, so opening it is a bit convoluted. Here's how:
 
@@ -161,22 +161,22 @@ cd ProteinDigestionSimulator/
 ### Used the following setting to digest our combined fasta file, Geoduck-transcriptome-plus-PRTC.pep
 
 ### Tab 1:
-![Tab 1](../../images/UsingPDS02.png)
+![Tab 1](../images/UsingPDS02.png)
 
 ### Tab 2:
-![Tab 2](../../images/UsingPDS03.png)
+![Tab 2](../images/UsingPDS03.png)
 
 ### Tab 3:
-![Tab 3](../../images/UsingPDS04.png)
+![Tab 3](../images/UsingPDS04.png)
 
 ### Tab 4:
-![Tab 4](../../images/UsingPDS05.png)
+![Tab 4](../images/UsingPDS05.png)
 
 ### Progress (took ~30 minutes)
-![Progress](../../images/UsingPDS06.png)
+![Progress](../images/UsingPDS06.png)
 
 ### Complete!
-![Complete!](../../images/UsingPDS07.png)
+![Complete!](../images/UsingPDS07.png)
 
 
 ```python

@@ -12,8 +12,7 @@
   * Created a .txt file with list of paths to all mzML files   
   * Confired that we have a a .txt file with path to the background proteome database 
 
-### All PECAN input files must be located in the same directory. Let's move them to the same directory now: 
-
+### Important note: All PECAN input files must be located in the same directory.
 [NEED TO INCLUDE SCRIPT TO DO THIS]
 
 ### The final PECAN execution was run by UW Genome Sciences due to the enormous amount of memory required.  However, in the interest of potential future users (e.g. using Hyak), here are some lessons learned while using PECAN. Note, these may be fixed in future updates: 

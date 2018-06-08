@@ -5,8 +5,10 @@
 # ==> Salinity
 # ==> Tide height (estim. from http://tbone.biol.sc.edu/).
 
-Env.Data <- data.frame(read.csv(file="data/Environmental/EnvData-Master.csv", stringsAsFactors=F, header=T, na.strings = ""))
+Env.Data <- data.frame(read.csv(file="data/Environmental/EnvData-Master-fixed-salinity.csv", stringsAsFactors=F, header=T, na.strings = c("", "NA")))
 Env.parameters <- c("pH","DO","Salinity","Temperature")
+Env.Data$DateTime <- as.POSIXct(strptime(Env.Data$DateTime, format="%m/%d/%y %H:%M", tz=Sys.timezone())) # date in the format: YearMonthDay Hour:Minute
+head(T.Data)
 
 # pH 
 pH.Data <- Env.Data[,c(1,grep("pH\\.", colnames(Env.Data)))]
@@ -40,8 +42,8 @@ T.series <- plot_ly(data = T.Data.melted.noNA, x = ~DateTime, y = ~value, type="
          legend = list(x=.95, y=.95))
 
 # Salinity
-S.Data <- Env.Data[,c(1,grep("ctS", colnames(Env.Data)))]
-names(S.Data) <- c("DateTime", "CI-B", "CI-E", "FB-B", "FB-E", "PG-E", "SK-E", "SK-B", "WB-B", "WB-E")
+S.Data <- Env.Data[,c(1,grep("sal", colnames(Env.Data)))]
+names(S.Data) <- c("DateTime", "CI-B", "CI-E", "FB-B", "FB-E", "PG-E", "SK-B", "SK-E", "WB-B", "WB-E")
 S.Data.melted <- melt(S.Data, id="DateTime")
 S.Data.melted$value <- as.numeric(levels(S.Data.melted$value))[S.Data.melted$value]
 S.Data.melted.noNA <- S.Data.melted[which(!is.na(S.Data.melted$value)),]
@@ -70,7 +72,7 @@ pH.series
 
 # Sampling Dates & estimated tide elevation (to inform exposure)
 # ==> Case Inlet: July 19th; cut off env. data at -1.0 - "never fully exposed"
-# ==> Willapa Bay: July 20th-22nd (?); cut off env. data at 1.5 - "fully exposed/dry"
+# ==> Willapa Bay: July 20th-22nd; cut off env. data at 1.5 - "fully exposed/dry"
 # ==> Port Gamble: July 20th-22nd; cut off env. data at 0 - "fully exposed/dry"
 # ==> Fidalgo Bay: July 20th-22nd; cut off env. data at -1.25 - "never fully exposed"
 # ==> Skokomish: July 22nd 
@@ -105,10 +107,10 @@ Env.Data.Master <- rbind(Env.Data.Master, T.Data.melted.noNA, Tide.Data.melted.n
 Env.Data.Master$metric <- as.factor(Env.Data.Master$metric)
 
 # Remove DO data from FBE after 6/24 @ 08:40:00, as the probe clearly malfunctioned after that time. 
-Env.Data.Master <- subset(Env.Data.Master, !(variable=="FB-E" & metric=="DO" & DateTime > "06/24/16 08:40:00"))
+Env.Data.Master <- subset(Env.Data.Master, !(variable=="FB-E" & metric=="DO" & DateTime > "2016-06-24 08:40:00"))
 
 # Remove Salinity data where probes exposed / malfunctioned (zero time points, identified via plots)
-Env.Data.Master <- subset(Env.Data.Master, !((variable=="CI-E" & metric=="Salinity") | (variable=="FB-B" & metric=="Salinity" & DateTime > "07/03/16 09:50:00") | (variable=="WB-B" & metric=="Salinity" & DateTime > "06/25/16 05:30:00")))
+Env.Data.Master <- subset(Env.Data.Master, !((variable=="CI-E" & metric=="Salinity") | (variable=="FB-B" & metric=="Salinity" & DateTime > "2016/07/03 09:50:00") | (variable=="WB-B" & metric=="Salinity" & DateTime > "2016/06/25 05:30:00")))
 
 # Identify and remove outliers from pH, DO & Salinity data. Apply Tukey's method of removing outlying values, where values outside the inner fence removed: 
 Env.Data.Master.noOuts <- Env.Data.Master
@@ -151,7 +153,7 @@ Env.Data.Master.noOuts <- subset(Env.Data.Master.noOuts, variable!="SK-B")
 write.csv(file="results/Environmental/EnvData-Melted-NoOutliers.csv",Env.Data.Master.noOuts, col.names = T, row.names=F)
 
 # Geoduck were outplanted from ~June 21 -> July 22, extract only environmental data from this time span  
-Env.Data.Master.noOuts.geo <- Env.Data.Master.noOuts[which(Env.Data.Master.noOuts$DateTime >= "06/21/16 00:00:00"),]
+Env.Data.Master.noOuts.geo <- Env.Data.Master.noOuts[which(Env.Data.Master.noOuts$DateTime >= "2016-06-21 00:00:00"),]
 
 # Plot the outlier-scrubbed environmental data sets to be used in analysis 
 
@@ -186,7 +188,7 @@ metadata <- aggregate(Region ~ Bay + Habitat +Sample.Shorthand, data.melted.plus
 Env.Data.Master.noOuts.geo <- merge(x=Env.Data.Master.noOuts.geo, y=metadata, by.x = "variable", by.y = "Sample.Shorthand", all.x=T, all.y=T)
 
 # convert to date/time and retain as a new field
-Env.Data.Master.noOuts.geo$DateTime <- as.POSIXct(strptime(Env.Data.Master.noOuts.geo$DateTime, format="%m/%d/%Y %H:%M:%S", tz=Sys.timezone())) # date in the format: YearMonthDay Hour:Minute
+#Env.Data.Master.noOuts.geo$DateTime <- as.POSIXct(strptime(Env.Data.Master.noOuts.geo$DateTime, format="%m/%d/%Y %H:%M:%S", tz=Sys.timezone())) # date in the format: YearMonthDay Hour:Minute
 
 # Pull summary statistics for each environmental variable by location 
 EnvSum <- set_colnames(aggregate(value ~ variable*metric + Bay + Habitat + Region, Env.Data.Master.noOuts.geo, mean), c("variable", "metric", "Bay", "Habitat", "Region", "Mean"))
@@ -195,12 +197,15 @@ EnvSum$sd <- aggregate(value ~ variable*metric + Bay + Habitat + Region, Env.Dat
 EnvSum$Var <- aggregate(value ~ variable*metric + Bay + Habitat + Region, Env.Data.Master.noOuts.geo, var)$value
 EnvSum$Min <- aggregate(value ~ variable*metric + Bay + Habitat + Region, Env.Data.Master.noOuts.geo, min)$value
 EnvSum$Max <- aggregate(value ~ variable*metric + Bay + Habitat + Region, Env.Data.Master.noOuts.geo, max)$value
-View(EnvSum)
+write.csv(file="results/Environmental/Environmental-summary-stats.csv", EnvSum, col.names = T, row.names=F )
 
 # Grand mean, sd, variance values 
 aggregate(value ~ metric, Env.Data.Master.noOuts.geo, max)
+aggregate(value ~ metric, Env.Data.Master.noOuts.geo, min)
 aggregate(value ~ metric + Habitat , Env.Data.Master.noOuts.geo, mean)
-aggregate(value ~ metric + Habitat , Env.Data.Master.noOuts.geo, var)
+aggregate(value ~ metric + Habitat , Env.Data.Master.noOuts.geo, sd)
+View(aggregate(value ~ metric + Bay , Env.Data.Master.noOuts.geo, sd))
+View(aggregate(value ~ metric + Bay , Env.Data.Master.noOuts.geo, mean))
 aggregate(value ~ metric, Env.Data.Master.noOuts.geo, var)
 View(aggregate(value ~ metric + variable , Env.Data.Master.noOuts.geo, mean))
 View(aggregate(value ~ metric + variable , Env.Data.Master.noOuts.geo, sd))
@@ -219,6 +224,17 @@ Env.Data.Master.noOuts.geo_daily <- as.data.frame(subset(Env.Data.Master.noOuts.
                                                     group_by(Day, variable, metric, Bay, Habitat, Region) %>% # group by the day column
                                                     summarise(daily.mean=mean(value), daily.sd=sd(value), daily.var=var(value), daily.min=min(value), daily.max=max(value)) %>%  
                                                     na.omit())
+# Calculate daily ranges for environmental parameters
+Env.Data.Master.noOuts.geo_daily$range <- Env.Data.Master.noOuts.geo_daily$daily.max - Env.Data.Master.noOuts.geo_daily$daily.min
+
+# View daily mean range by location 
+View(aggregate(range ~ metric + variable , Env.Data.Master.noOuts.geo_daily, mean))
+
+# Calculate mean daily pH range across all locations 
+mean(Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$metric == "pH"),]$range)
+
+# Calculate SD of daily pH range across all locations 
+sd(Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$metric == "pH"),]$range)
 
 # statistics on daily mean and daily standard deviation data sets 
 

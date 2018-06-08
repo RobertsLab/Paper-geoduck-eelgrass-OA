@@ -80,7 +80,7 @@ I received a protein fasta file from Steven, which will be used as the backgroun
 We added a standard, the Peptide Retention Time Calibration mixture (PRTC), to each sample before injecting during our mass spec run.  We need to include them in our background database so that PECAN assigns the transitions associated with PRTC correctly.
 
 * **Input Files:**
-  - Peptide Retention Time Calibration mixture (PRTC) protein sequence, fasta file: [P00000_Pierce_prtc.fasta](../../data/DIA/P00000_Pierce_prtc.fasta)
+  - Peptide Retention Time Calibration mixture (PRTC) protein sequence, fasta file: [P00000_Pierce_prtc.fasta](../data/DIA/P00000_Pierce_prtc.fasta)
   - Geoduck transcriptome with trimmed header, from Step 2: [Geoduck-transcriptome-v2.transdecoder_TrimmedHeadr.pep](http://owl.fish.washington.edu/generosa/Generosa_DNR/Geoduck-transcriptome-v2.transdecoder_TrimmedHeadr.pep)  
 * **Output File:** Combined geoduck transcriptome + PRTC fasta file: [GeoTranscriptomePRTC.fasta](http://owl.fish.washington.edu/generosa/Generosa_DNR/GeoTranscriptomePRTC.fasta)
 

@@ -20,7 +20,7 @@ In the scripts below I outline where on Woodpecker it is saved.
 ----
 
 ### Step 1: 
-Download .raw files from Owl to local folder on Windows computer; see [Notebook 00: downloading .raw files](../../notebooks/DIA/00-Downloading-raw-DIA-files.md)
+Download .raw files from Owl to local folder on Windows computer; see [Script 01: Downloading raw DIA files](../scripts-notebooks/01-Script-Downloading-raw-DIA-files.R)
 
 ### Optional Step 2: 
 If you downloaded the .raw files in a .zip folder via gui interface you may have difficulty extracting the files; this happened for me, where only a few files extracted correctly and the rest resulted in 0kb files. I thus downloaded the [WinZip 21.0](http://www.winzip.com/win/en/downwz.html) program to Woodpecker and used that to fully unzip my .raw files folder.
@@ -55,4 +55,4 @@ In this screen shot I am running the script in a folder containing 5 .raw files:
 
 ![Using MS Convert on Woodpecker](https://github.com/RobertsLab/Paper-DNR-Geoduck-Proteomics/blob/master/images/Demultiplexing-.raw-files.png?raw=true)
 
-### Once complete, the converted files will be .mzML format, located in the same folder as your .raw files. You will use these in PECAN in [Notebook 03, building spectral library with PECAN](https://github.com/RobertsLab/Paper-DNR-Geoduck-Proteomics/blob/master/notebooks/DIA/03-Building%20Spectral%20Library%20with%20PECAN%20.ipynb)
+Once complete, the converted files will be .mzML format, located in the same folder as your .raw files. You will use these in PECAN in [../scripts-notebooks/Notebook 06, building spectral library with PECAN](06-Notebook-Building-Spectral-Library-with-PECAN.md)
