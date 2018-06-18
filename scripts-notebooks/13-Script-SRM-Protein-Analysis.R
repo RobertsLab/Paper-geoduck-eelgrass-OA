@@ -21,10 +21,8 @@ write.csv(data.melted.plus, "results/SRM/SRM-data-meaned-melted.csv")
 data.melted.plus.pepsum <- aggregate(value ~ Peptide + Sample + Protein + Region + Bay + Habitat + Exclosure + Sample.Shorthand, data.melted.plus, sum)
 write.csv(data.melted.plus.pepsum, "results/SRM/SRM-data-peptide-summed.csv")
 
-
 # pull out protein names 
 Protein.names <- levels(data.melted.plus.pepsum$Protein)
-
 
 # Average peptide abundance by protein 
 data.melted.plus.promean <- aggregate(value ~ Protein + Sample + Region + Bay + Habitat + Exclosure + Sample.Shorthand, data.melted.plus.pepsum, mean)
@@ -35,24 +33,32 @@ summary(data.melted.plus.pepsum$value[data.melted.plus.pepsum$value>0])
 
 # Calculate protein abundance Coefficients of Variation for each peptide, grouped by location
 
-# What's the overall peptide variance by protein, NOT grouped by location? 
-peptide.variances.NOTsite <- data.melted.plus.pepsum%>%group_by(Peptide,Protein)%>%dplyr::summarise(SD=sd(value), Mean=mean(value))
+# What's the overall peptide variance by protein 
+peptide.variances.NOTsite <- data.melted.plus.pepsum%>%group_by(Peptide,Protein,Bay)%>%dplyr::summarise(SD=sd(value), Mean=mean(value))
 peptide.variances.NOTsite$cv <- peptide.variances.NOTsite$SD/peptide.variances.NOTsite$Mean
 mean(peptide.variances.NOTsite$cv) #this is the grand CV = 60% 
+write.csv(file="results/SRM/peptide-CV-by-peptide-protein-bay.csv", dcast(peptide.variances.NOTsite, Peptide+Protein ~ Bay, value.var="cv"))
+aggregate(data=peptide.variances.NOTsite, cv ~ Protein, mean)
 
 # CV by protein, grouped by location 
-peptide.variances <- data.melted.plus.pepsum%>%group_by(Peptide,Protein,Sample.Shorthand)%>%dplyr::summarise(SD=sd(value), Mean=mean(value))
+peptide.variances <- data.melted.plus.pepsum%>%group_by(Peptide,Protein,Sample.Shorthand, Bay)%>%dplyr::summarise(SD=sd(value), Mean=mean(value))
 peptide.variances$cv <- peptide.variances$SD/peptide.variances$Mean
-mean(peptide.variances$cv, na.rm = T) # 57% CV when grouped by location 
+mean(peptide.variances$cv, na.rm = T) # 57% CV when grouped by location
+write.csv(file="results/SRM/peptide-CV-by-protein.csv", aggregate(data=peptide.variances.NOTsite, cv ~ Peptide + Protein, mean))
 
 # Mean CV by various grouping factors and save as .csv 
 peptide.variances.mean <- aggregate(data=peptide.variances, cv ~ Peptide+Protein, mean) #mean CV for each peptide 
 protein.variances.sites <- aggregate(data=peptide.variances, cv ~ Sample.Shorthand, mean) #mean CV of peptides by location 
 protein.variances.protein <- aggregate(data=peptide.variances, cv ~ Protein, mean) #mean CV of peptides by protein 
+protein.variances.protein.location <- aggregate(data=peptide.variances, cv ~ Protein + Sample.Shorthand, mean) #mean CV of peptides by protein 
+protein.variances.protein.bay <- aggregate(data=peptide.variances, cv ~ Protein + Bay, mean) #mean CV of peptides by protein 
+aggregate(data=peptide.variances, cv ~ Bay, mean) #mean CV of peptides by protein
 
 write.csv(file="results/SRM/peptide-CV.csv", peptide.variances.mean)
 write.csv(file="results/SRM/peptide-CV-by-location.csv", protein.variances.sites)
-write.csv(file="results/SRM/peptide-CV-by-protein.csv", protein.variances.protein)
+write.csv(file="results/SRM/peptide-CV-by-protein-location.csv", dcast(protein.variances.protein.location, Protein ~ Sample.Shorthand, value.var="cv"))
+write.csv(file="results/SRM/peptide-CV-by-protein-bay.csv", dcast(protein.variances.protein.bay, Protein ~ Bay, value.var="cv"))
+
 
 # Test for normality
 par(mfrow = c(3, 3))
@@ -94,6 +100,7 @@ for (i in 1:length(Protein.names)) {
 # Create box plots and ID outliers
 OutVals <- vector("list", length(Protein.names))
 names(OutVals) <- Protein.names
+
 png("results/SRM/protein-boxplots-%02d.png", width=700, height=700)
 par(mfrow = c(3, 3))
 for (i in 1:length(Protein.names)) {
@@ -110,20 +117,39 @@ Prot.outliers  = do.call(rbind, outliers) #this is a dataframe with outliers, as
 
 ## Use ANOVA to determine any difference in protein abundance between habitat, bay, or NMDS-clustered regions 
 
+# Test differences in all proteins combined between bay, habitat 
+anova(lm(lambda.t ~ Bay*Habitat, data=data.melted.plus.pepsum))
+anova(lm(lambda.t ~ Bay, data=data.melted.plus.pepsum))
+anova(lm(lambda.t ~ Region, data=data.melted.plus.pepsum))
+
 # 2-way ANOVA on protein abundance for each protein individually: data is analyzed by protein, but each point represents the sum of transitions within a peptide, lambda-transformed. 
 
 p.ANOVA.hb <- vector("list", length(Protein.names))
 names(p.ANOVA.hb) <- Protein.names
 for (i in 1:length(Protein.names)) {
-  temp1 <- lm(lambda.t ~ Bay*Habitat, data=data.melted.plus.pepsum[grepl(c(Protein.names[[i]]), data.melted.plus.pepsum$Protein),])
+  temp1 <- lm(lambda.t ~ Bay+Habitat, data=data.melted.plus.pepsum[grepl(c(Protein.names[[i]]), data.melted.plus.pepsum$Protein),])
   temp2 <- anova(temp1)
   p.ANOVA.hb[[i]] <- as.data.frame(temp2[,c(1:5)])
   p.ANOVA.hb[[i]]$Protein <- c((Protein.names[i]))
   p.ANOVA.hb[[i]]$Comparison <- rownames(p.ANOVA.hb[[i]])
 }
 Prot.ANOVA.hb <- do.call(rbind, p.ANOVA.hb) #this is a dataframe with ANOVA results for each protein with each comparison. 
-Prot.ANOVA.hb$P.adj <- (Prot.ANOVA.hb$`Pr(>F)`*13)
+Prot.ANOVA.hb$P.adj <- (Prot.ANOVA.hb$`Pr(>F)`*14)
 write.csv(file="results/SRM/Protein-ANOVA-Habitat-Results.csv", Prot.ANOVA.hb)
+
+# ANOVA on protein abundances for each bay 
+p.ANOVA.b <- vector("list", length(Protein.names))
+names(p.ANOVA.b) <- Protein.names
+for (i in 1:length(Protein.names)) {
+  temp1 <- lm(lambda.t ~ Bay, data=data.melted.plus.pepsum[grepl(c(Protein.names[[i]]), data.melted.plus.pepsum$Protein),])
+  temp2 <- anova(temp1)
+  p.ANOVA.b[[i]] <- as.data.frame(temp2[,c(1:5)])
+  p.ANOVA.b[[i]]$Protein <- c((Protein.names[i]))
+  p.ANOVA.b[[i]]$Comparison <- rownames(p.ANOVA.b[[i]])
+}
+Prot.ANOVA.b <- do.call(rbind, p.ANOVA.b) #this is a dataframe with ANOVA results for each protein with each comparison. 
+Prot.ANOVA.b$P.adj <- (Prot.ANOVA.b$`Pr(>F)`*14)
+write.csv(file="results/SRM/Protein-ANOVA-Bay-Results.csv", Prot.ANOVA.b)
 
 # Differentially expressed proteins by Bay - which bays are different? 
 
@@ -174,7 +200,7 @@ for (i in 1:length(Protein.names)) {
   p.ANOVA.r[[i]]$Comparison <- rownames(p.ANOVA.r[[i]])
 }
 Prot.ANOVA.r <- do.call(rbind, p.ANOVA.r) #this is a dataframe with ANOVA results for each protein with each comparison. 
-Prot.ANOVA.r$P.adj <- (Prot.ANOVA.r$`Pr(>F)`*13)
+Prot.ANOVA.r$P.adj <- (Prot.ANOVA.r$`Pr(>F)`*14)
 write.csv(file="results/SRM/Protein-ANOVA-Region-Results.csv", Prot.ANOVA.r)
 
 # Test correlation between peptides within a protein. Run Pearson Correlation test, and plo protein peptides against each other to confirm linear correlation; equation should be ~1:1 

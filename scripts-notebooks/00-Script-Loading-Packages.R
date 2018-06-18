@@ -14,6 +14,11 @@ library(reshape)
 library(reshape2)
 library(pryr)
 library(HH)
+library(maps) #Basic mapping functions and some data
+library(mapdata)  #Some additional HiRes data
+library(maptools) #Useful tools such as reading shapefiles
+library(mapproj) #Various mapping projections
+library(PBSmapping) #Powerful mapping functions developed by Pacific Biological Station
 
 Sys.setenv("plotly_username"="lhs3") #Insert Plotly username 
 Sys.setenv("plotly_api_key"="hIUVsdBYDizTQLhMUwLC") #Insert Plotly API key

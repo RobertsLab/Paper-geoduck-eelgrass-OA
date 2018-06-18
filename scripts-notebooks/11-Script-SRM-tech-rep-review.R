@@ -166,6 +166,7 @@ plotly_IMAGE(p.techrep, width = 1200, height = 500, format = "png", scale = 2,
 
 ## Filter dataset to removes any remaining transitions within samples with cv >40 
 SRM.final <- SRM.reps4stats.s.plots[which(SRM.reps4stats.s.plots$cv <= 40),] #final dataset to be used in SRM analysis ("mean" column)
+
 write.csv(SRM.final, file="data/SRM/SRM-data-screened-final.csv")
 
 # Number transitions maintained in final SRM dataset (out of 113 targets)

@@ -45,7 +45,6 @@ Growth$Percent <- (((Growth$Growth+Growth$AvgIShell)/Growth$AvgIShell)-1)*100
 aggregate(Percent ~ Both, Growth, mean)
 aggregate(Percent ~ Both, Growth, sd)
 
-
 # Survival statistics
 Survival <- read.csv("data/Geoduck-Survival.csv", header=TRUE, stringsAsFactors = TRUE)
 chisq.test(table(Survival$Survival, Survival$Both)) #not significant  
