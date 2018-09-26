@@ -1,4 +1,4 @@
-I# data 
+## data 
 
  - **Geoduck-sample-info.csv:** metadata for geoduck ctenidia tissue samples. Metrics include:  
    * **Box #:** sample box where tissues were held  

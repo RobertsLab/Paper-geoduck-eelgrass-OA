@@ -1,4 +1,4 @@
-# Script to download .raw files corresponding to geoduck tissue sample SRM data from Vantage MS/MS
+# Script to download .raw files corresponding to geoduck tissue sample DIA data from Lumos MS/MS
 
 ## IMPORTANT: the first step in this script creates a directory, where all .raw files will be downloaded. Feel free to change the location of this directory
 getwd() # see which directory is currently your working directory; should be this repo: Paper-geoduck-eelgrass-OA
@@ -29,7 +29,7 @@ for(i in 1:nrow(GeoURLS)) {
   curl_download(GeoURLS[i,1], basename(GeoURLS[i,1]), quiet = TRUE, mode="wb")
 }
 
-# Files should now be in the directory ../Downloads/2017-Geoduck-SRM-raw/ ... let's confirm that we have all of them:
+# Files should now be in the directory "2017-Geoduck-DIA-raw/" - let's confirm that we have all of them:
 howmanyfiles <- list.files(pattern="*.raw")
 length(howmanyfiles) == nrow(GeoURLS) #should equal TRUE
 
