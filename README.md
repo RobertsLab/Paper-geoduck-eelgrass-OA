@@ -1,5 +1,5 @@
 # Paper-geoduck-eelgrass-OA 
-## _Pacific geoduck (_Panopea generosa_) resilience to natural pH variation_ 
+## _Pacific geoduck_ (Panopea generosa) _resilience to natural pH variation_ 
 
 
 
