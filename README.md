@@ -1,21 +1,20 @@
 # Paper-geoduck-eelgrass-OA 
-#_Evidence of wide pH tolerance in juvenile geoduck in variable environments_ 
+## _Pacific geoduck (_Panopea generosa_) resilience to natural pH variation_ 
 
 
 
 Repo for paper on 2016 deployment of juvenile _Panopea generosa_ (Pacific geoduck) to investigate response to pH natural setting. Project was in collaboration with WA Department of Natural Resources, UW Biology, UW Genome Sciences.
   
 
-### Collaborators / Authors 
+### ColAuthors 
 
-1. University of Washington, School of Aquatic and Fisheries Sciences  
-   - Laura H Spencer, Yaamini Venkataraman, Steven Roberts  
-2. Washington State Department of Natural Resources  
-   - Micah Horwith  
-3. University of Washington, Biological Sciences   
-   - Alex Lowe  
-4. University of Washington, Genome Sciences  
-   - Emma Timmins-Schiffman, Brook Nunn  
+Laura H Spencer<sup>a</sup>, Micah Horwith<sup>b</sup>, Alex Lowe<sup>c</sup>, Yaamini R. Venkataraman<sup>a</sup>, Emma Timmins-Schiffman<sup>d</sup>, Brook L. Nunn<sup>d</sup>, Steven Roberts<sup>a</sup>  
+
+<sup>a</sup>University of Washington, School of Aquatic and Fishery Sciences, 1122 NE Boat St, Seattle, WA 98105, United States   
+<sup>b</sup>Washington State Department of Natural Resources, MS 47027, Olympia, WA 98504, United States  
+<sup>c</sup>University of Washington, Biological Sciences, 24 Kincaid Hall, Seattle, WA 98105, United States  
+<sup>d</sup>University of Washington, Genome Sciences, William H. Foege Hall, 3720 15th Ave NE, Seattle, WA 98195, United States  
+
 
 
 ### Abstract 
