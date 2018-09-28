@@ -6,7 +6,7 @@
 Repo for paper on 2016 deployment of juvenile _Panopea generosa_ (Pacific geoduck) to investigate response to pH natural setting. Project was in collaboration with WA Department of Natural Resources, UW Biology, UW Genome Sciences.
   
 
-### ColAuthors 
+### Authors 
 
 Laura H Spencer<sup>a</sup>, Micah Horwith<sup>b</sup>, Alex Lowe<sup>c</sup>, Yaamini R. Venkataraman<sup>a</sup>, Emma Timmins-Schiffman<sup>d</sup>, Brook L. Nunn<sup>d</sup>, Steven Roberts<sup>a</sup>  
 
