@@ -8,7 +8,7 @@
 Env.Data <- data.frame(read.csv(file="data/Environmental/EnvData-Master-fixed-salinity.csv", stringsAsFactors=F, header=T, na.strings = c("", "NA")))
 Env.parameters <- c("pH","DO","Salinity","Temperature")
 Env.Data$DateTime <- as.POSIXct(strptime(Env.Data$DateTime, format="%m/%d/%y %H:%M", tz=Sys.timezone())) # date in the format: YearMonthDay Hour:Minute
-head(T.Data)
+
 
 # pH 
 pH.Data <- Env.Data[,c(1,grep("pH\\.", colnames(Env.Data)))]
@@ -150,7 +150,7 @@ Env.Data.Master.noOuts <- subset(Env.Data.Master.noOuts, variable!="SK-E")
 Env.Data.Master.noOuts <- subset(Env.Data.Master.noOuts, variable!="SK-B")
 
 # Save this outlier-scrubbed dataset as .csv
-write.csv(file="results/Environmental/EnvData-Melted-NoOutliers.csv",Env.Data.Master.noOuts, col.names = T, row.names=F)
+write.csv(file="results/Environmental/EnvData-Melted-NoOutliers.csv",Env.Data.Master.noOuts, row.names=F)
 
 # Geoduck were outplanted from ~June 21 -> July 22, extract only environmental data from this time span  
 Env.Data.Master.noOuts.geo <- Env.Data.Master.noOuts[which(Env.Data.Master.noOuts$DateTime >= "2016-06-21 00:00:00"),]
@@ -184,6 +184,7 @@ DO.series.noOuts
 Temperature.series.noOuts
 
 # Join outlier-scrubbed master environmental dataset with metadata 
+data.melted.plus.pepsum <- read.csv("results/SRM/SRM-data-peptide-summed.csv", header=T)[-1]
 metadata <- aggregate(Region ~ Bay + Habitat +Sample.Shorthand, data.melted.plus.pepsum, FUN=unique)
 Env.Data.Master.noOuts.geo <- merge(x=Env.Data.Master.noOuts.geo, y=metadata, by.x = "variable", by.y = "Sample.Shorthand", all.x=T, all.y=T)
 
@@ -254,20 +255,23 @@ for (i in 1:length(Env.parameters)) {
 
 summary(pH.mean.lm <- lm(daily.mean ~ Bay*Habitat, data=Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$metric %in% "pH"),]))
 anova(pH.mean.lm)
-anova(pH.mean.lm)[[5]]*16
+anova(pH.mean.lm)[[5]]*16 #bonferroni corrected p-values for Bay, Habitat, and Bay*Habitat
+anova(lm(daily.mean ~ Region, data=Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$metric %in% "pH"),]))[[5]]*16  # Regional differences, corrected 
 
 summary(DO.mean.lm <- lm(daily.mean ~ Bay*Habitat, data=Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$metric %in% "DO"),]))  #yes
 anova(DO.mean.lm)
 anova(DO.mean.lm)[[5]]*16
+anova(lm(daily.mean ~ Region, data=Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$metric %in% "DO"),]))[[5]]*16
 
 summary(Temp.mean.lm <- lm(daily.mean ~ Bay* Habitat, data=Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$metric %in% "Temperature"),])) #not between habitats
 anova(Temp.mean.lm)
 anova(Temp.mean.lm)[[5]]*16
+anova(lm(daily.mean ~ Region, data=Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$metric %in% "Temperature"),]))[[5]]*16
 
-summary(Salin.mean.lm <- lm(daily.mean ~ Bay* Habitat, data=Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$metric %in% "Salinity"),]))  #yes
+summary(Salin.mean.lm <- lm(daily.mean ~ Bay, data=Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$metric %in% "Salinity"),]))  #yes
 anova(Salin.mean.lm)
 anova(Salin.mean.lm)[[5]]*16
-
+anova(lm(daily.mean ~ Region, data=Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$metric %in% "Salinity"),]))[[5]]*16  #Regional differences 
 
 # Assess normality of daily standard deviation - not normal. 
 par(mfrow = c(2, 2))
@@ -312,6 +316,7 @@ for (i in 1:length(Env.parameters)) {
 summary(pH.sd.lm <- lm(sd.lambda ~ Bay*Habitat, data=Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$metric %in% "pH"),])) #yes
 anova(pH.sd.lm)
 anova(pH.sd.lm)[[5]]*16
+anova(lm(sd.lambda ~ Region, data=Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$metric %in% "pH"),]))[[5]]*16
 
 min(Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$metric %in% "pH"),"daily.sd"])
 max(Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$metric %in% "pH"),"daily.sd"])
@@ -321,11 +326,14 @@ mean(Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$met
 summary(DO.sd.lm <- lm(sd.lambda ~ Bay*Habitat, data=Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$metric %in% "DO"),]))  #yes
 anova(DO.sd.lm)
 anova(DO.sd.lm)[[5]]*16
+anova(lm(sd.lambda ~ Region, data=Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$metric %in% "DO"),]))[[5]]*16
 
 summary(T.sd.lm <- lm(sd.lambda ~ Bay*Habitat, data=Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$metric %in% "Temperature"),])) #not between habitats
 anova(T.sd.lm)
 anova(T.sd.lm)[[5]]*16
+anova(lm(sd.lambda ~ Region, data=Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$metric %in% "Temperature"),]))[[5]]*16
 
-summary(S.sd.lm <- lm(sd.lambda ~ Bay* Habitat, data=Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$metric %in% "Salinity"),]))  #yes
+summary(S.sd.lm <- lm(sd.lambda ~ Bay, data=Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$metric %in% "Salinity"),]))  #yes
 anova(S.sd.lm)
 anova(S.sd.lm)[[5]]*16
+anova(lm(sd.lambda ~ Region, data=Env.Data.Master.noOuts.geo_daily[which(Env.Data.Master.noOuts.geo_daily$metric %in% "Salinity"),]))[[5]]*16

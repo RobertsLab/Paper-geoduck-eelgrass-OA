@@ -93,6 +93,18 @@ api_create(DIA.p, filename = "DIA-NMDS-plot-by-sample#.png") #https://plot.ly/~l
 plotly_IMAGE(DIA.p, width = 500, height = 500, format = "png", scale = 2,
              out_file = "results/DIA/DIA-NMDS-plot-by-sample#.png")
 
+DIA.NMDS.annotated <- as.data.frame(DIA.NMDS.samples)
+DIA.NMDS.annotated$file <- gsub("G", "", rownames(DIA.NMDS.samples))
+DIA.NMDS.annotated <- merge(x=DIA.NMDS.annotated, y=GeoFile.ann, by.x="file", by.y="File")
+
+p.DIA.NMDS <- plot_ly(data=DIA.NMDS.annotated, x=~NMDS1, y=~NMDS2, color=~Bay, symbol=~Habitat, type="scatter", mode="markers", marker = list(size = 20), colors=marker, hoverinfo = 'text', text = ~Sample) %>% 
+  layout(title="DIA NMDS of all proteins by Site, Treatment",
+         xaxis = list(title = 'NMDS Axis 1'),
+         yaxis = list(title = 'NMDS Axis 2'))
+# save DIA NMDS plot to file 
+plotly_IMAGE(p.DIA.NMDS, width = 1000, height = 1000, format = "jpeg", scale = 2,
+             out_file = "results/DIA/Geoduck-DIA-NMDS.jpeg")
+
 # Don't need to remove any reps, as they cluster together 
 
 # Mean tech reps across samples 

@@ -17,6 +17,7 @@ hist(Growth$FShell) #normal dist?
 
 anova(lm(Growth ~ Bay*Habitat, data=Growth)) #no growth differences between habitats across all bays, so now look at all combination of bays 
 anova(lm(Growth ~ Bay, data=Growth)) # yes, growth differences between bays. 
+anova(lm(Growth ~ Region, data=Growth)) # yes, growth differences between ad-hoc region 
 
 # Any habitat influence on growth within each bay? 
 anova(lm(Growth ~ Habitat, data=subset(Growth, Bay=="FB")))  #no
@@ -61,6 +62,7 @@ chisq.test(table(Survival$Survival, Survival$Both)) #not significant
 chisq.test(table(Survival$Survival, Survival$Bay)) #not significant  
 chisq.test(table(Survival$Survival, Survival$Region)) #not significant  
 anova(lm(Survival ~ Bay*Patch, data=Survival)) #No difference in survival between site or habitat
+anova(lm(Survival ~ Region, data=Survival)) #No difference in survival between Region
 
 # Survival different between patches, within regions? 
 anova(lm(Survival ~ Bay*Patch, data=subset(Survival, (Bay=="FB" | Bay=="PG")))) #

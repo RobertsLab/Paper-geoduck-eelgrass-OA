@@ -7,12 +7,13 @@ locationCords <- read.csv("data/Environmental/Deployment-Coordinates.csv", heade
 locationCords <- locationCords[order(locationCords$Latitude),] #Reorder location coordinates by latittude (south to north)
 locationCords.bay <- locationCords[c(2,4,6,7),] #pull out one set of coordinates for each bay 
 marker1 = c("sienna1", "goldenrod1", "steelblue2", "royalblue3") #marker colors for each bay, from south to north 
-symbols <- c(21, 22, 23, 24) #symbol shapes for each bay, south to north 
+#symbols <- c(21, 22, 23, 24) #symbol shapes for each bay, south to north 
+symbols <- c(21, 21, 21, 21) #use just one symbol shape, 
 data(nepacLLhigh) #Load set of polygons for the NE Pacific Ocean in high resolution from PBSmapping
 
 # Create file to save map 
 # svg(filename = "results/Deployment-map.svg") # uncomment/comment depending on which file type you want 
-png(filename = "results/Deployment-map.png") #save this way for now- need to make high resolution later 
+jpeg(filename = "results/Deployment-map.jpeg", width = 600, height = 600)
 
 # Create base map of coastal WA state 
 plotMap(nepacLLhigh, xlim = c(-125, -121.9), ylim = c(46, 48.9), col = "gray92", bg = "gray85", xaxt = "n", yaxt = "n", xlab = "", ylab = "", ann = FALSE) #Create a map with high resolution NE Pacific Ocean data. Remove axes since those will be manually added
@@ -23,10 +24,10 @@ axis(side = 2, at = c(46.5, 47, 47.5, 48, 48.5), labels=c("46.5ºN", "47°N", "4
 
 #Add points to map 
 for (i in 1:length(symbols)) {
-  points(x = locationCords.bay$Longitude[i], y = locationCords.bay$Latitude[i], pch= symbols[i], add = TRUE, col = marker1[i], bg=marker1[i], lwd=2, cex=2.5)
+  points(x = locationCords.bay$Longitude[i], y = locationCords.bay$Latitude[i], pch= symbols[i], add = TRUE, col = marker1[i], bg=marker1[i], lwd=2, cex=3.5)
 }
 # Add legend 
-legend("topleft", inset=0.05, legend=rev(locationCords.bay$Site), col=rev(marker1), cex=1.2, pt.cex = 2, pt.bg=rev(marker1), bg="gray92", pch=rev(symbols), box.lty=1, box.lwd=1, box.col="black")
+legend("topleft", inset=0.05, legend=rev(locationCords.bay$Site), col=rev(marker1), cex=1.5, pt.cex = 3, pt.bg=rev(marker1), bg="gray92", pch=rev(symbols), box.lty=1, box.lwd=1, box.col="black")
 dev.off() #Turn off plotting device
 
 #####  Environmental parameter time series - daily mean over time, gray ribbons = daily standard deviation 
@@ -36,8 +37,6 @@ group.colors <- c(WB = "sienna1", CI = "goldenrod1", PG ="steelblue2",  FB = "ro
 # Daily mean pH 
 
 # Fidalgo Bay
-#png("results/Environmental/pH-FB-daily-mean.png", width=700, height=685)
-
 pH.FB <- ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="pH" & (variable=="FB-E" | variable=="FB-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="royalblue3")  + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=14, face="bold", margin=margin(0,0,2,0)), axis.text.y=element_text(size=14, angle=45), axis.text.x=element_text(size=14, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=14, face="bold"), axis.title.y=element_blank(), legend.position = "none", panel.background = element_blank()) + ggtitle("Fidalgo Bay daily mean pH") + ylim(6.84, 8.24) + labs(x="Date", y="pH", size=14) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) + theme(plot.margin=unit(c(.2,.2,.5,0),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 #Port Gamble
@@ -49,25 +48,34 @@ pH.CI <- ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="pH" & (v
 #Willapa Bay
 pH.WB <- ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="pH" & (variable=="WB-E" | variable=="WB-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="sienna1")   + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=14, face="bold", margin=margin(0,0,2,0)), axis.text.y=element_text(size=14, angle=45), axis.text.x=element_text(size=14, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=16, face="bold"), axis.title.y=element_blank(), legend.position = "none", panel.background = element_blank()) + labs(x="Date", y="pH", size=16) +  ggtitle("Willapa Bay daily mean pH") + ylim(6.84, 8.24) + theme(plot.margin=unit(c(.2,.2,.2,0),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
 
+jpeg(filename = "results/Environmental/pH-plots.jpeg", width = 600, height = 1200) 
 plot_grid(pH.FB, pH.PG, pH.CI, pH.WB,
           align = "v",   
           nrow=4,
           rel_heights = c(.5, .5, .5, .7)) #adjust row heights so plots in last row aren't smaller (they have x-axis tex
-# saved with width=600, height=1200
+dev.off()
 
 #### Relative Growth 
 
 # Boxplot outline colors 
-group.colors2 <- c(`WB-U` = "sienna3", `WB-E` = "sienna1", `CI-U` = "goldenrod3", `CI-E` = "goldenrod1", `PG-U` ="steelblue3", `PG-E` ="steelblue2", `FB-U` = "royalblue4", `FB-E` = "royalblue3")
+#group.colors2 <- c(`WB-U` = "sienna3", `WB-E` = "sienna1", `CI-U` = "goldenrod3", `CI-E` = "goldenrod1", `PG-U` ="steelblue3", `PG-E` ="steelblue2", `FB-U` = "royalblue4", `FB-E` = "royalblue3")
 
 # Boxplot fill colors 
-group.colors3 <- c(`WB-U` = "sienna1", `WB-E` = "white", `CI-U` = "goldenrod1", `CI-E` = "white", `PG-U` ="steelblue2", `PG-E` ="white", `FB-U` = "royalblue3", `FB-E` = "white")
+#group.colors3 <- c(`WB-U` = "sienna1", `WB-E` = "white", `CI-U` = "goldenrod1", `CI-E` = "white", `PG-U` ="steelblue2", `PG-E` ="white", `FB-U` = "royalblue3", `FB-E` = "white")
+
+#----
+group.colors2 <- c(`WB-U` = "sienna1", `WB-E` = "sienna3", `CI-U` = "goldenrod1", `CI-E` = "goldenrod3", `PG-U` ="steelblue2", `PG-E` ="steelblue3", `FB-U` = "royalblue3", `FB-E` = "royalblue4")
+
+# Boxplot fill colors 
+group.colors3 <- c(`WB-U` = "white", `WB-E` = "sienna1", `CI-U` = "white", `CI-E` = "goldenrod1", `PG-U` ="white", `PG-E` ="steelblue2", `FB-U` = "white", `FB-E` = "royalblue3")
+
+#----
 
 # Reorder factors geographically, north to south (FB -> PGB -> CI -> WB)
 Growth$Both<-factor(Growth$Both, levels=c("FB-U", "FB-E", "PG-U", "PG-E", "CI-U", "CI-E", "WB-U", "WB-E"))
 Growth$Bay<-factor(Growth$Bay, levels=c("FB", "PG", "CI", "WB"))
 
-png("results/Growth-plot.png", width=700, height=700)
+jpeg("results/Growth-plot.jpeg", width=700, height=700)
 ggplot(Growth, aes(x=factor(Both), y=as.numeric(Growth), color=Both, fill=Both)) + geom_boxplot() + xlab("Location") + ylab("Growth (mm)") + scale_color_manual(values=group.colors2, labels=c("Willapa Bay", "Case Inlet", "Port Gamble Bay", "Fidalgo Bay")) + scale_fill_manual(values=group.colors3) + theme_light() + theme(plot.title = element_text(size=26, face="bold"), axis.text.y=element_text(size=28, angle=45, face="bold"), axis.text.x=element_text(size=24, angle=45, hjust=0.95, vjust=0.9), axis.title=element_text(size=28,face="bold"), legend.position = "none", panel.background = element_blank()) + ggtitle("Growth (mm) relative to \ninitial group length") + guides(fill = guide_legend(reverse = TRUE)) + theme(plot.margin=unit(c(.2,.2,.2,.2),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1)) + ylim(-3,8.25) + 
   annotate('segment', x = 4.75, xend = 8.25, y = 5, yend=5, colour="black") + 
   annotate('segment', x = 0.75, xend = 4.25, y = 6.5, yend=6.5, colour="black") + 
@@ -83,6 +91,9 @@ dev.off()
 data.melted.plus.promean <- aggregate(value ~ Sample + Protein + Region + Bay + Habitat + Exclosure + Sample.Shorthand, data.melted.plus, mean)
 write.csv(data.melted.plus.promean, "results/SRM/SRM-data-protein-meanpeptide.csv") #save to file 
 
+# Read in, if needed 
+data.melted.plus.promean <- read.csv("results/SRM/SRM-data-protein-meanpeptide.csv", header = T, row.names = 1)
+
 # Swap out "U" (unvegetated) for "B" (bare) in the location code 
 data.melted.plus.promean$Sample.Shorthand <- sub("-B", "-U", data.melted.plus.promean$Sample.Shorthand)
   
@@ -92,6 +103,7 @@ data.melted.plus.promean$Sample.Shorthand<-factor(data.melted.plus.promean$Sampl
 data.melted.plus.promean$Bay<-factor(data.melted.plus.promean$Bay, levels=c("FB", "PG", "CI", "WB"))
 
 # create empty protein plot list 
+Protein.names <- unique(data.melted.plus.promean$Protein)
 protein.plots <- vector("list", length(Protein.names))
 names(protein.plots) <- Protein.names
 
@@ -115,6 +127,7 @@ protein.plots[[11]] <- protein.plots[[11]] + ggtitle("Na/K-transporting ATPase")
 protein.plots[[12]] <- protein.plots[[12]] + xlab("Location") + theme(axis.text.x=element_text(size=14, angle=45, hjust=0.95, vjust=0.9, face="bold"), axis.title.x=element_text(size=14,face="bold")) + ggtitle("superoxide dismutase") + scale_y_continuous(labels=scales::scientific, breaks=c(2e5, 4e5, 6e5))
 protein.plots[[13]] <- protein.plots[[13]] + xlab("Location") + theme(axis.text.x=element_text(size=14, angle=45, hjust=0.95, vjust=0.9, face="bold"), axis.title.x=element_text(size=14,face="bold")) + ggtitle("**trifunctional enzyme β-subunit") + scale_y_continuous(labels=scales::scientific, breaks=c(6e4, 1.4e5, 2.2e5))
 
+jpeg(filename = "results/SRM/Protein-plots-paper.jpeg", width = 850, height = 1250) 
 plot_grid(protein.plots[[1]],
           protein.plots[[2]],
           protein.plots[[3]],
@@ -128,13 +141,14 @@ plot_grid(protein.plots[[1]],
           align = "v",   
           nrow=5, 
           rel_heights = c(rep(.5, times=4), 0.7)) #adjust row heights so plots in last row aren't smaller (they have x-axis text)
+dev.off()
 
 #### Plots included in supplementary 
 
 #####  NMDS Plot
 marker1 = c("sienna1", "goldenrod1", "steelblue2", "royalblue3")
 
-png("results/SRM/SRM-NMDS-for-paper.png", width = 800, height = 600) 
+jpeg("results/SRM/SRM-NMDS-for-paper.jpeg", width = 800, height = 600) 
 par(mar=c(5,5,4,1)+.1)
 plot.default(x=NULL, y=NULL, type="n", xlab="Axis 1", ylab="Axis 2", xlim=c(-3.8,3), ylim=c(-0.28,0.22), asp=NA, main="Geoduck SRM Protein Abundance\nNMDS Similarity Plot", width=600,height=600, cex.axis=1.8, cex.lab=1.8, cex.main=1.8)
 points(SRM.nmds4plotly[c(CI.B.samples),], col=marker1[2], pch=15, cex=2.7, lwd=2)
@@ -151,75 +165,110 @@ dev.off()
 # Daily mean DO
 
 #Fidalgo Bay
-png("results/Environmental/DO-FB-daily-mean.png", width=700, height=700)
-ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="DO" & (variable=="FB-E" | variable=="FB-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="royalblue3") + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=24, face="bold"), axis.text.y=element_text(size=18, angle=45), axis.text.x=element_text(size=18, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=18, face="bold"), axis.title.y=element_text(size=18, face="bold"), legend.position = "none", panel.background = element_blank()) + ggtitle("(A) Fidalgo Bay daily mean DO") + ylim(0, 21) + labs(x="Date", y="DO (mg/L)", size=18) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) + theme(plot.margin=unit(c(.2,.2,.2,.2),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
-dev.off()
+DO.FB <- ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="DO" & (variable=="FB-E" | variable=="FB-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="royalblue3") + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=14, face="bold"), axis.text.y=element_text(size=14, angle=45), axis.text.x=element_text(size=14, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=14, face="bold"), axis.title.y=element_blank(), legend.position = "none", panel.background = element_blank()) + ggtitle("Fidalgo Bay daily mean DO") + ylim(0, 21) + labs(x="Date", y="DO (mg/L)", size=16) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) + theme(plot.margin=unit(c(.2,.2,.2,.2),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 # Port Gamble Bay
-png("results/Environmental/DO-PG-daily-mean.png", width=700, height=700)
-ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="DO" & (variable=="PG-E" | variable=="PG-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="steelblue2")  + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=24, face="bold"), axis.text.y=element_text(size=18, angle=45, face="bold"), axis.text.x=element_text(size=18, face="bold"), axis.title=element_blank(), legend.position = "none", panel.background = element_blank())  + ggtitle("(B) Port Gamble Bay daily mean DO") + ylim(0, 21)  + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) + theme(plot.margin=unit(c(.2,.2,.2,.2),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
-dev.off()
+DO.PG <- ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="DO" & (variable=="PG-E" | variable=="PG-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="steelblue2") + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=14, face="bold"), axis.text.y=element_text(size=14, angle=45), axis.text.x=element_text(size=14, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=14, face="bold"), axis.title.y=element_blank(), legend.position = "none", panel.background = element_blank()) + ggtitle("Port Gamble Bay daily mean DO") + ylim(0, 21) + labs(x="Date", y="DO (mg/L)", size=16) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) + theme(plot.margin=unit(c(.2,.2,.2,.2),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 # Case Inlet
-png("results/Environmental/DO-CI-daily-mean.png", width=700, height=700)
-ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="DO" & (variable=="CI-E" | variable=="CI-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="goldenrod1")   + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=24, face="bold"), axis.text.y=element_text(size=18, angle=45), axis.text.x=element_text(size=18, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=18, face="bold"), axis.title.y=element_text(size=18, face="bold"), legend.position = "none", panel.background = element_blank()) +  ggtitle("(C) Case Inlet daily mean DO") + ylim(0, 21)  + labs(x="Date", y="DO (mg/L)", size=18) + theme(plot.margin=unit(c(.2,.2,.2,.2),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
-dev.off()
+DO.CI <- ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="DO" & (variable=="CI-E" | variable=="CI-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="goldenrod1") + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=14, face="bold"), axis.text.y=element_text(size=14, angle=45), axis.text.x=element_text(size=14, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=14, face="bold"), axis.title.y=element_blank(), legend.position = "none", panel.background = element_blank()) + ggtitle("Case Inlet daily mean DO") + ylim(0, 21) + labs(x="Date", y="DO (mg/L)", size=16) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) + theme(plot.margin=unit(c(.2,.2,.2,.2),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 # Willapa Bay
-png("results/Environmental/DO-WB-daily-mean.png", width=700, height=700)
-ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="DO" & (variable=="WB-E" | variable=="WB-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="sienna1") + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + scale_linetype_manual(values=c("dashed", "solid")) + theme_light() + theme(plot.title = element_text(size=24, face="bold"), axis.text.y=element_text(size=18, angle=45), axis.text.x=element_text(size=18, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=18, face="bold"), axis.title.y=element_text(size=18, face="bold"), legend.position = "none", panel.background = element_blank()) + labs(x="Date", y="DO (mg/L)", size=18) +  ggtitle("(D) Willapa Bay daily mean DO") + ylim(0, 21) + theme(axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) + theme(plot.margin=unit(c(.2,.2,.2,1),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
+DO.WB <- ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="DO" & (variable=="WB-E" | variable=="WB-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="sienna1")   + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=14, face="bold", margin=margin(0,0,2,0)), axis.text.y=element_text(size=14, angle=45), axis.text.x=element_text(size=14, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=16, face="bold"), axis.title.y=element_blank(), legend.position = "none", panel.background = element_blank()) + labs(x="Date", y="pH", size=16) +  ggtitle("Willapa Bay daily mean DO") + ylim(0, 21) + theme(plot.margin=unit(c(.2,.2,.2,0),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+jpeg(filename = "results/Environmental/DO-plots.jpeg", width = 600, height = 1200) 
+plot_grid(DO.FB, DO.PG, DO.CI, DO.WB,
+          align = "v",   
+          nrow=4,
+          rel_heights = c(.5, .5, .5, .7)) #adjust row heights so plots in last row aren't smaller (they have x-axis tex
 dev.off()
 
 # Daily mean Temperature
 
 #Fidalgo Bay
-png("results/Environmental/Temp-FB-daily-mean.png", width=700, height=700)
-ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="Temperature" & (variable=="FB-E" | variable=="FB-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="royalblue3") + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=24, face="bold"), axis.text.y=element_text(size=18, angle=45), axis.text.x=element_text(size=18, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=18, face="bold"), axis.title.y=element_text(size=18, face="bold"), legend.position = "none", panel.background = element_blank()) + ggtitle("(A) Fidalgo Bay daily mean temperature") + ylim(10, 25) + labs(x="Date", y="Temperature (°C)", size=18) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) + theme(plot.margin=unit(c(.2,.2,.2,.2),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
-dev.off()
+T.FB <- ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="Temperature" & (variable=="FB-E" | variable=="FB-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="royalblue3") + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=14, face="bold"), axis.text.y=element_text(size=14, angle=45), axis.text.x=element_text(size=14, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=14, face="bold"), axis.title.y=element_blank(), legend.position = "none", panel.background = element_blank()) + ggtitle("Fidalgo Bay daily mean temperature") + ylim(10, 25) + labs(x="Date", y="DO (mg/L)", size=16) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) + theme(plot.margin=unit(c(.2,.2,.2,.2),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
 
-#Port Gamble Bay
-png("results/Environmental/Temp-PG-daily-mean.png", width=700, height=700)
-ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="Temperature" & (variable=="PG-E" | variable=="PG-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="steelblue2")  + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=24, face="bold"), axis.text.y=element_text(size=18, angle=45, face="bold"), axis.text.x=element_text(size=18, face="bold"), axis.title=element_blank(), legend.position = "none", panel.background = element_blank())  + ggtitle("(B) Port Gamble Bay daily mean temperature") + ylim(10, 25)  + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) + theme(plot.margin=unit(c(.2,.2,.2,.2),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
-dev.off()
+# Port Gamble Bay
+T.PG <- ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="Temperature" & (variable=="PG-E" | variable=="PG-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="steelblue2") + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=14, face="bold"), axis.text.y=element_text(size=14, angle=45), axis.text.x=element_text(size=14, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=14, face="bold"), axis.title.y=element_blank(), legend.position = "none", panel.background = element_blank()) + ggtitle("Port Gamble Bay daily mean temperature") + ylim(10, 25) + labs(x="Date", y="DO (mg/L)", size=16) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) + theme(plot.margin=unit(c(.2,.2,.2,.2),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 # Case Inlet
-png("results/Environmental/Temp-CI-daily-mean.png", width=700, height=700)
-ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="Temperature" & (variable=="CI-E" | variable=="CI-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="goldenrod1")   + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=24, face="bold"), axis.text.y=element_text(size=18, angle=45), axis.text.x=element_text(size=18, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=18, face="bold"), axis.title.y=element_text(size=18, face="bold"), legend.position = "none", panel.background = element_blank()) +  ggtitle("(C) Case Inlet daily mean temperature") + ylim(10, 25)  + labs(x="Date", y="Temperature (°C)", size=18) + theme(plot.margin=unit(c(.2,.5,.2,.2),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
-dev.off()
+T.CI <- ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="Temperature" & (variable=="CI-E" | variable=="CI-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="goldenrod1") + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=14, face="bold"), axis.text.y=element_text(size=14, angle=45), axis.text.x=element_text(size=14, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=14, face="bold"), axis.title.y=element_blank(), legend.position = "none", panel.background = element_blank()) + ggtitle("Case Inlet daily mean temperature") + ylim(10, 25) + labs(x="Date", y="DO (mg/L)", size=16) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) + theme(plot.margin=unit(c(.2,.2,.2,.2),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 # Willapa Bay
-png("results/Environmental/Temp-WB-daily-mean.png", width=700, height=700)
-ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="Temperature" & (variable=="WB-E" | variable=="WB-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="sienna1") + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + scale_linetype_manual(values=c("dashed", "solid")) + theme_light() + theme(plot.title = element_text(size=24, face="bold"), axis.text.y=element_text(size=18, angle=45), axis.text.x=element_text(size=18, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=18, face="bold"), axis.title.y=element_text(size=18, face="bold"), legend.position = "none", panel.background = element_blank()) + labs(x="Date", y="DO (mg/L)", size=18) +  ggtitle("(D) Willapa Bay daily mean temperature") + ylim(10, 25) + theme(axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) + theme(plot.margin=unit(c(.2,.2,.2,1),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
-dev.off()
+T.WB <- ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="Temperature" & (variable=="WB-E" | variable=="WB-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="sienna1")   + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=14, face="bold", margin=margin(0,0,2,0)), axis.text.y=element_text(size=14, angle=45), axis.text.x=element_text(size=14, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=16, face="bold"), axis.title.y=element_blank(), legend.position = "none", panel.background = element_blank()) + labs(x="Date", y="pH", size=16) +  ggtitle("Willapa Bay daily mean temperature") + ylim(10, 25) + theme(plot.margin=unit(c(.2,.2,.2,0),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
 
+jpeg(filename = "results/Environmental/temperature-plots.jpeg", width = 600, height = 1200) 
+plot_grid(T.FB, T.PG, T.CI, T.WB,
+          align = "v",   
+          nrow=4,
+          rel_heights = c(.5, .5, .5, .7)) #adjust row heights so plots in last row aren't smaller (they have x-axis tex
+dev.off()
 
 # Daily mean Salinity
 
-# Fidalgo Bay
-png("results/Environmental/Salinity-FB-daily-mean.png", width=700, height=700)
-ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="Salinity" & (variable=="FB-E" | variable=="FB-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="royalblue3") + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=24, face="bold"), axis.text.y=element_text(size=18, angle=45), axis.text.x=element_text(size=18, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=18, face="bold"), axis.title.y=element_text(size=18, face="bold"), legend.position = "none", panel.background = element_blank()) + ggtitle("(A) Fidalgo Bay daily mean salinity") + labs(x="Date", y="Salinity (PSU)", size=18) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) + theme(plot.margin=unit(c(.2,.2,.8,.2),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1)) + ylim(20.2, 31.1)
-dev.off()
+#Fidalgo Bay
+S.FB <- ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="Salinity" & (variable=="FB-E" | variable=="FB-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="royalblue3") + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=14, face="bold"), axis.text.y=element_text(size=14, angle=45), axis.text.x=element_text(size=14, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=14, face="bold"), axis.title.y=element_blank(), legend.position = "none", panel.background = element_blank()) + ggtitle("Fidalgo Bay daily mean salinity") + ylim(20.2, 31.1) + labs(x="Date", size=16) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) + theme(plot.margin=unit(c(.2,.2,.2,.2),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
 
-#Port Gamble Bay
-png("results/Environmental/Salinity-PG-daily-mean.png", width=700, height=700)
-ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="Salinity" & (variable=="PG-E" | variable=="PG-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="steelblue2")  + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=24, face="bold"), axis.text.y=element_text(size=18, angle=45, face="bold"), axis.text.x=element_text(size=18, face="bold"), axis.title=element_blank(), legend.position = "none", panel.background = element_blank())  + ggtitle("(B) Port Gamble Bay daily mean salinity")  + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(), axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) + theme(plot.margin=unit(c(.2,.2,.2,.2),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))  + ylim(20.2, 31.1)
-dev.off()
+# Port Gamble Bay
+S.PG <- ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="Salinity" & (variable=="PG-E" | variable=="PG-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="steelblue2") + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=14, face="bold"), axis.text.y=element_text(size=14, angle=45), axis.text.x=element_text(size=14, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=14, face="bold"), axis.title.y=element_blank(), legend.position = "none", panel.background = element_blank()) + ggtitle("Port Gamble Bay daily mean salinity") + ylim(20.2, 31.1) + labs(x="Date", size=16) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) + theme(plot.margin=unit(c(.2,.2,.2,.2),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
 
-#Case Inlet
-png("results/Environmental/Salinity-CI-daily-mean.png", width=700, height=700)
-ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="Salinity" & (variable=="CI-E" | variable=="CI-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="goldenrod1")   + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=24, face="bold"), axis.text.y=element_text(size=18, angle=45), axis.text.x=element_text(size=18, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=18, face="bold"), axis.title.y=element_text(size=18, face="bold"), legend.position = "none", panel.background = element_blank()) +  ggtitle("(C) Case Inlet daily mean salinity")  + labs(x="Date", y="Salinity (PSU)", size=18) + theme(plot.margin=unit(c(.2,.2,.2,.2),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))  + ylim(20.2, 31.1)
-dev.off()
+# Case Inlet
+S.CI <- ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="Salinity" & (variable=="CI-E" | variable=="CI-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="goldenrod1") + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=14, face="bold"), axis.text.y=element_text(size=14, angle=45), axis.text.x=element_text(size=14, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=14, face="bold"), axis.title.y=element_blank(), legend.position = "none", panel.background = element_blank()) + ggtitle("Case Inlet daily mean salinity") + ylim(20.2, 31.1) + labs(x="Date", size=16) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) + theme(plot.margin=unit(c(.2,.2,.2,.2),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
 
 # Willapa Bay
-png("results/Environmental/Salinity-WB-daily-mean.png", width=700, height=700)
-ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="Salinity" & (variable=="WB-E" | variable=="WB-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="sienna1") + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + scale_linetype_manual(values=c("dashed", "solid")) + theme_light() + theme(plot.title = element_text(size=24, face="bold"), axis.text.y=element_text(size=18, angle=45), axis.text.x=element_text(size=18, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=18, face="bold"), axis.title.y=element_text(size=18, face="bold"), legend.position = "none", panel.background = element_blank()) + labs(x="Date", y="DO (mg/L)", size=18) +  ggtitle("(D) Willapa Bay daily mean salinity") + theme(axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) + theme(plot.margin=unit(c(.2,.2,.2,1),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1)) + ylim(20.2, 31.1)
+S.WB <- ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="Salinity" & (variable=="WB-E" | variable=="WB-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="sienna1")   + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=14, face="bold", margin=margin(0,0,2,0)), axis.text.y=element_text(size=14, angle=45), axis.text.x=element_text(size=14, angle=45, hjust=0.95, vjust=0.9), axis.title.x=element_text(size=16, face="bold"), axis.title.y=element_blank(), legend.position = "none", panel.background = element_blank()) + labs(x="Date", y="pH", size=16) +  ggtitle("Willapa Bay daily mean salinity") + ylim(20.2, 31.1) + theme(plot.margin=unit(c(.2,.2,.2,0),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
+
+jpeg(filename = "results/Environmental/salinity-plots.jpeg", width = 600, height = 1200) 
+plot_grid(S.FB, S.PG, S.CI, S.WB,
+          align = "v",   
+          nrow=4,
+          rel_heights = c(.5, .5, .5, .7)) #adjust row heights so plots in last row aren't smaller (they have x-axis tex
 dev.off()
 
+# GRAPHICAL ABSTRACT PLOTS 
 
+# Fidalgo Bay
+pH.FB.ga <- ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="pH" & (variable=="FB-E" | variable=="FB-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="royalblue3")  + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_text(size=24, face="bold", margin=margin(0,0,2,0)), axis.text.y=element_text(size=26, angle=45, face="bold"), axis.text.x=element_blank(), axis.title.x=element_blank(), axis.title.y=element_blank(), legend.position = "none", panel.background = element_blank()) + ggtitle("Daily mean pH differed between eelgrass (dotted)\n& unvegetated (solid) across estuarine bays") + ylim(6.84, 8.24) + labs(x="Date", y="pH", size=26) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) + theme(plot.margin=unit(c(.2,.2,.5,0),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
 
+#Port Gamble
+pH.PG.ga <- ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="pH" & (variable=="PG-E" | variable=="PG-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="steelblue2")  + scale_linetype_manual(values=c("solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_blank(), axis.text.y=element_text(size=26, angle=45, face="bold"), axis.text.x=element_blank(), axis.title=element_blank(), legend.position = "none", panel.background = element_blank())  + ggtitle("Port Gamble Bay daily mean pH") + ylim(6.84, 8.24)  + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank()) + theme(plot.margin=unit(c(.2,.2,.5,0),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
 
+#Case Inlet
+pH.CI.ga <- ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="pH" & (variable=="CI-E" | variable=="CI-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="goldenrod1")   + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_blank(), axis.text.y=element_text(size=26, angle=45, face="bold"), axis.text.x=element_blank(), axis.title=element_blank(), legend.position = "none", panel.background = element_blank())  +  ggtitle("Case Inlet daily mean pH") + ylim(6.84, 8.24)  + labs(x="Date", y="pH", size=18) + theme(plot.margin=unit(c(.2,.2,.5,0),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1)) + theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
 
+#Willapa Bay
+pH.WB.ga <- ggplot(data=subset(Env.Data.Master.noOuts.geo_daily, (metric=="pH" & (variable=="WB-E" | variable=="WB-B"))), aes(x=Day,y=daily.mean,colour=variable,group=variable)) + geom_line(size=2, aes(linetype=variable), color="sienna1")   + scale_linetype_manual(values=c("dashed", "solid")) + geom_ribbon(aes(ymax=daily.mean + daily.sd, ymin=daily.mean-daily.sd, alpha=0.5), colour=NA, fill = "grey70") + theme_light() + theme(plot.title = element_blank(), axis.text.y=element_text(size=26, angle=45, face="bold"), axis.text.x=element_text(size=26, angle=45, hjust=0.95, vjust=0.9, face="bold"), axis.title.x=element_blank(), axis.title.y=element_blank(), legend.position = "none", panel.background = element_blank()) + labs(x="Date", y="pH", size=16) +  ggtitle("Willapa Bay daily mean pH") + ylim(6.84, 8.24) + theme(plot.margin=unit(c(.2,.2,.2,0),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1))
 
+jpeg(filename = "results/Environmental/pH-plots-graphical-abstract.jpeg", width = 620, height = 1200) 
+plot_grid(pH.FB.ga, pH.PG.ga, pH.CI.ga, pH.WB.ga,
+          align = "v",   
+          nrow=4,
+          rel_heights = c(.5, .5, .5, .7)) #adjust row heights so plots in last row aren't smaller (they have x-axis tex
+dev.off()
+
+# MEAN PEPTIDE ABUNDANCE (LOG-TRANSFORMED) FIDALGO BAY
+pep.FB.ga <- ggplot(subset(data.melted.plus.promean, Bay=="FB"), aes(x=Sample.Shorthand, y=value, color=Sample.Shorthand, fill=Sample.Shorthand)) + geom_violin(trim=F) + scale_color_manual(values=group.colors2[7:8]) + scale_fill_manual(values=group.colors3[7:8]) + theme_light() + theme(plot.title = element_text(size=24, face="bold", margin=margin(0,0,2,0)), axis.title.y=element_blank(), axis.text.y=element_text(size=24, face="bold", angle=25), axis.text.x=element_text(size=14, angle=45, hjust=0.95, vjust=0.9, face="bold"), axis.title=element_text(size=14,face="bold"), legend.position = "none", panel.background = element_blank()) + ggtitle("No difference between geoduck proteins\nin unvegetated (solid) & eelgrass (white) \nall targeted peptide abundances shown") + guides(fill = guide_legend(reverse = TRUE)) + theme(plot.margin=unit(c(.1,.1,.1,.1),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1)) +   theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+
+# MEAN PEPTIDE ABUNDANCE (LOG-TRANSFORMED) PORT GAMBLE 
+pep.PG.ga <- ggplot(subset(data.melted.plus.promean, Bay=="PG"), aes(x=Sample.Shorthand, y=value, color=Sample.Shorthand, fill=Sample.Shorthand)) + geom_violin(trim=F) + scale_color_manual(values=group.colors2[5:6]) + scale_fill_manual(values=group.colors3[5:6]) + theme_light() + theme(plot.title = element_blank(), axis.title.y=element_blank(), axis.text.y=element_text(size=24, face="bold", angle=25), axis.text.x=element_text(size=14, angle=45, hjust=0.95, vjust=0.9, face="bold"), axis.title=element_text(size=14,face="bold"), legend.position = "none", panel.background = element_blank()) + ggtitle("Mean peptide abundance by habitat") + guides(fill = guide_legend(reverse = TRUE)) + theme(plot.margin=unit(c(.1,.1,.1,.1),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1)) +   theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+
+# MEAN PEPTIDE ABUNDANCE (LOG-TRANSFORMED) CASE INLET
+pep.CI.ga <- ggplot(subset(data.melted.plus.promean, Bay=="CI"), aes(x=Sample.Shorthand, y=value, color=Sample.Shorthand, fill=Sample.Shorthand)) + geom_violin(trim=F) + scale_color_manual(values=group.colors2[3:4]) + scale_fill_manual(values=group.colors3[3:4]) + theme_light() + theme(plot.title = element_blank(), axis.title.y=element_blank(), axis.text.y=element_text(size=24, face="bold", angle=25), axis.text.x=element_text(size=14, angle=45, hjust=0.95, vjust=0.9, face="bold"), axis.title=element_text(size=14,face="bold"), legend.position = "none", panel.background = element_blank()) + ggtitle("Mean peptide abundance by habitat") + guides(fill = guide_legend(reverse = TRUE)) + theme(plot.margin=unit(c(.1,.1,.1,.1),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1)) +   theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+
+# MEAN PEPTIDE ABUNDANCE (LOG-TRANSFORMED) WILLAPA BAY
+pep.WB.ga <- ggplot(subset(data.melted.plus.promean, Bay=="WB"), aes(x=Sample.Shorthand, y=value, color=Sample.Shorthand, fill=Sample.Shorthand)) + geom_violin(trim=F) + scale_color_manual(values=group.colors2[1:2]) + scale_fill_manual(values=group.colors3[1:2]) + theme_light() + theme(plot.title = element_blank(), axis.title.y=element_blank(), axis.text.y=element_text(size=24, face="bold", angle=25), axis.text.x=element_text(size=14, angle=45, hjust=0.95, vjust=0.9, face="bold"), axis.title=element_text(size=14,face="bold"), legend.position = "none", panel.background = element_blank())  + guides(fill = guide_legend(reverse = TRUE)) + theme(plot.margin=unit(c(.1,.1,.1,.1),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1)) +   theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank())
+
+jpeg(filename = "results/SRM/mean-peptide-graphical-abstract.jpeg", width = 550, height = 1300) 
+plot_grid(pep.FB.ga, pep.PG.ga, pep.CI.ga, pep.WB.ga,
+          align = "v",   
+          nrow=4,
+          rel_heights = c(.6, .5, .5, .5)) #adjust row heights so plots in last row aren't smaller (they have x-axis tex
+dev.off()
+
+# MEAN PEPTIDE ABUNDANCE (LOG-TRANSFORMED) ALL SITES 
+jpeg(filename = "results/SRM/all-peptide-graphical-abstract.jpeg", width = 500, height = 600) 
+ggplot(data.melted.plus.promean, aes(x=factor(Sample.Shorthand, levels=rev(levels(Sample.Shorthand))), y=value, color=Sample.Shorthand, fill=Sample.Shorthand)) + geom_violin(trim=F) + scale_color_manual(values=group.colors2) + scale_fill_manual(values=group.colors3) + theme_light() + theme(plot.title = element_text(size=24, face="bold", margin=margin(0,0,2,0)), axis.title.y=element_blank(), axis.text.y=element_blank(), axis.text.x=element_text(size=20, angle=45, hjust=0.95, vjust=0.9, face="bold"), axis.title=element_text(size=24,face="bold"), legend.position = "none", panel.background = element_blank()) + ggtitle("Protein and growth differed between\nbays (colors) but not between habitats\n(eelgrass = white, unvegetated = solid)") + labs(y="targeted peptide spectral abundance") + guides(fill = guide_legend(reverse = TRUE)) + theme(plot.margin=unit(c(.1,.1,.1,.1),"cm"), panel.border = element_rect(colour = "black", fill=NA, size=1)) + scale_y_continuous(labels=scales::scientific, breaks=c(0e6,2e6,4e6,6e6,8e6,10e6,12e6)) + coord_flip() 
+dev.off()
 
 #### below are plots not included in current paper draft 
 
@@ -289,5 +338,3 @@ ggplot(data.melted.plus.promean[grepl(c("Trifunctional"), data.melted.plus.prome
   geom_boxplot(data=data.melted.plus.promean[grepl(c("HSP90"), data.melted.plus.promean$Protein),]) +
   geom_boxplot(data=data.melted.plus.promean[grepl(c("Puromycin"), data.melted.plus.promean$Protein),]) + scale_y_continuous(trans='sqrt', labels=scales::scientific, breaks=c(9.9e4,  4.6e5, 3.0e6), sec.axis = sec_axis(~., name = "", breaks=c(9.9e4,  4.6e5, 3.0e6), labels = c("TEβ**", "PSA*", "HSP90**"))) 
 dev.off()
-
-
