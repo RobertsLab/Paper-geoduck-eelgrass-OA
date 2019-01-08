@@ -25,6 +25,7 @@ Project presentation PDF, pre-print paper PDF
 
 ### scripts-notebooks
 All R scripts for data analyses, Markdown notebooks for data processing steps not executed in R
+Scripts are numbered sequentially in order of execution, and names indicate contents/steps executed in each notebook. Each notebook also contains details.   
 
 ### data
 Raw, QC'd and annotated data, organized into subdirectories by DIA, SRM and Environmental  
