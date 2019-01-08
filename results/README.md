@@ -19,11 +19,10 @@ Correlation plots between:
   * **EnvData-Melted-NoOutliers.csv:** Environmental dataframe screened and melted into long form  
 
 ### SRM
-  * **Master-Data-Joined.csv:**
-  * **Pep-Env-Cor-test.csv:**  
-  * **SRM-NMDS-for-paper-blobs.png:**  
-  * **Protein-ANOVA-Region-Results.csv:**  
-  * **Protein-ANOVA-Habitat-Results.csv:**
-  * **protein-boxplots-01.png & protein-boxplots-02.png:**
-  * **peptide-CV-by-location.csv & peptide-CV-by-protein.csv:**
-  * **
+  * **correlation-tests-plots/:** correlation test results and plots between protein growth, environmental data and proteins
+  * **stats/:**: tables with ANOVA results, coefficients of variation (CV) for technical replicates, transitions, and peptides, for various grouping variables (variation within location, within bays)  
+  * **plots/:** plots of SRM protein results 
+  * **Master-Data-Joined.csv:** Protein abundances summary statistics merged with sample meta-data, environmental summary statistics 
+  * **SRM-data-meaned-melted.csv:** Peptide abundances (mean of transition abundances), in long format  
+  * **SRM-data-peptide-summed.csv:** Peptide abundances (sum of transition abundances), in long format  
+  * **SRM-data-protein-mean.csv:** Protein abundances (mean of peptide abundances, aka mean of sum of transitions for each peptide), in long format 
