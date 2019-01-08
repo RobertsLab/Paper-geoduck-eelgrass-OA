@@ -1,7 +1,7 @@
 # results 
 
 ### DIA
-  * [**DIA-detected-peptides-annotated.csv:**](http://owl.fish.washington.edu/generosa/Generosa_DNR/DIA-detected-peptides-annotated.csv) Screened and annotated peptides detected in geoduck ctendia tissue 
+  * [**DIA-detected-peptides-annotated.csv:**](http://owl.fish.washington.edu/generosa/Generosa_DNR/DIA-detected-peptides-annotated.csv) Screened and annotated peptides detected in geoduck ctendia tissue, click link to download from server. 
   * **DIA-NMDS-plot-by-sample#.png:** NMDS of DIA data showing technical replicate clustering, and organized by bay  
   * **DIA-annotated-UniprotID.csv:** UniprotID's for unique proteins detected in DIA run  
 
