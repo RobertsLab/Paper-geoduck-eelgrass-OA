@@ -1,12 +1,5 @@
 # results 
 
-### Correlation-Plots
-
-Correlation plots between:
-  * Each protein (using 1 peptide, the one with the highest abundance) against each environmental parameter (mean & SD for Temp, DO, pH, salinity)  
-  * Each protein against growth  
-  * Growth against each environmental parameter  
-
 ### DIA
   * [**DIA-detected-peptides-annotated.csv:**](http://owl.fish.washington.edu/generosa/Generosa_DNR/DIA-detected-peptides-annotated.csv) Screened and annotated peptides detected in geoduck ctendia tissue 
   * **DIA-NMDS-plot-by-sample#.png:** NMDS of DIA data showing technical replicate clustering, and organized by bay  
@@ -19,7 +12,10 @@ Correlation plots between:
   * **EnvData-Melted-NoOutliers.csv:** Environmental dataframe screened and melted into long form  
 
 ### SRM
-  * **correlation-tests-plots/:** correlation test results and plots between protein growth, environmental data and proteins
+  * **correlation-tests-plots/:** correlation plots between:
+    * Each protein (using 1 peptide, the one with the highest abundance) against each environmental parameter (mean & SD for Temp, DO, pH, salinity)  
+    * Each protein against growth  
+    * Growth against each environmental parameter    
   * **stats/:**: tables with ANOVA results, coefficients of variation (CV) for technical replicates, transitions, and peptides, for various grouping variables (variation within location, within bays)  
   * **plots/:** plots of SRM protein results 
   * **Master-Data-Joined.csv:** Protein abundances summary statistics merged with sample meta-data, environmental summary statistics 
