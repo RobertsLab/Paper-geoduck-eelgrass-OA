@@ -35,9 +35,9 @@ length(howmanyfiles) == nrow(GeoURLS) #should equal TRUE
 
 ####### Download geoduck gonad transcriptome fasta 
 
-# Download Transcriptome fasta file for use with PECAN 
-curl_download("https://raw.githubusercontent.com/sr320/paper-pano-go/52c6b18b5b09e5c3a49250cf47ad4ddc8e9dc004/data-results/Geoduck-transcriptome-v2.transdecoder.pep", destfile="../Geoduck-transcriptome-v2.transdecoder.pep", quiet = TRUE, mode="wb")
-
+# OPTIONAL: Transcriptome file for use with PECAN, Geoduck-transcriptome-v2.transdecoder.pep, should already be in the "2017-Geoduck-DIA-raw" directory. If not or if you'd like to use a different transcriptome, use the following script: 
+# curl_download("https://raw.githubusercontent.com/sr320/paper-pano-go/52c6b18b5b09e5c3a49250cf47ad4ddc8e9dc004/data-results/Geoduck-transcriptome-v2.transdecoder.pep", destfile="../Geoduck-transcriptome-v2.transdecoder.pep", quiet = TRUE, mode="wb")
+                    
 # OPTIONAL: if you didn't download the whole repo, you need to download the PRTC fasta file too
 # curl_download("https://github.com/RobertsLab/Paper-DNR-Geoduck-Proteomics/raw/master/data/DIA/P00000_Pierce_prtc.fasta", destfile="P00000_Pierce_prtc.fasta", quiet = TRUE, mode="wb")
 
