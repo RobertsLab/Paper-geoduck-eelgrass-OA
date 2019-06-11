@@ -1,6 +1,8 @@
 # Paper-geoduck-eelgrass-OA 
 ## _Pacific geoduck_ (Panopea generosa) _resilience to natural pH variation_ 
 
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/RobertsLab/Paper-geoduck-eelgrass-OA/master)
+
 ### Authors 
 
 Laura H Spencer<sup>a</sup>, Micah Horwith<sup>b</sup>, Alex Lowe<sup>c</sup>, Yaamini R. Venkataraman<sup>a</sup>, Emma Timmins-Schiffman<sup>d</sup>, Brook L. Nunn<sup>d</sup>, Steven Roberts<sup>a</sup>  
